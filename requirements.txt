@@ -1,8 +1,9 @@
-   fastapi
-   uvicorn
-   firebase-admin
-   python-dotenv
-   requests
-   pydantic
-   itsdangerous
-   email-validator
+fastapi
+uvicorn
+firebase-admin
+python-dotenv
+requests
+pydantic
+itsdangerous
+email-validator
+pytz
