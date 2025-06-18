@@ -14,21 +14,24 @@ from fastapi.requests import Request
 from fastapi.exceptions import RequestValidationError
 import requests
 from services import services_router
+import os
 
 
 app = FastAPI()
 
+SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY', 'default-insecure-secret-key')
+
 # Session middleware - add this before CORS
 app.add_middleware(
     SessionMiddleware,
-    secret_key="your-secret-key-here",  # Change this to a secure secret key
+    secret_key=SESSION_SECRET_KEY,  # Loaded from environment variable
     session_cookie="session"
 )
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:63342"],
+    allow_origins=["https://fillitcloudnexus.web.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,7 +48,7 @@ app.include_router(trip_history_router)
 app.include_router(driver_router)
 app.include_router(services_router, prefix='/api')
 
-RESEND_API_KEY = 're_Vd6z2KjX_HMHaP2rTG2YRD6Ft4tQStAA5'
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 RESEND_API_URL = 'https://api.resend.com/emails'
 
 @app.exception_handler(Exception)
@@ -54,7 +57,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"detail": str(exc)},
-        headers={"Access-Control-Allow-Origin": "http://localhost:63342"}
+        headers={"Access-Control-Allow-Origin": " https://fillitcloudnexus.web.app"}
     )
 
 @app.post('/api/contact')
