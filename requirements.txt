@@ -8,3 +8,4 @@ itsdangerous
 email-validator
 pytz
 apscheduler
+python-multipart
