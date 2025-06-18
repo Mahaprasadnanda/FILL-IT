@@ -5,3 +5,4 @@
    requests
    pydantic
    itsdangerous
+   email-validator
