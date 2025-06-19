@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -21,10 +20,10 @@ app = FastAPI()
 
 SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY', 'default-insecure-secret-key')
 
-# Session middleware - add this before CORS
+
 app.add_middleware(
     SessionMiddleware,
-    secret_key=SESSION_SECRET_KEY,  # Loaded from environment variable
+    secret_key=SESSION_SECRET_KEY,  
     session_cookie="session"
 )
 
@@ -37,10 +36,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files from the current directory
+
 app.mount("/static", StaticFiles(directory="."), name="static")
 
-# Mount routers
+
 app.include_router(login_router)
 app.include_router(signup_router)
 app.include_router(book_router)
@@ -81,18 +80,18 @@ async def contact(
             'Authorization': f'Bearer {RESEND_API_KEY}',
             'Content-Type': 'application/json'
         }
-        print("Sending email with data:", data)  # Debug log
+        print("Sending email with data:", data)  
         response = requests.post(RESEND_API_URL, json=data, headers=headers)
-        print("Resend API response:", response.status_code, response.text)  # Debug log
+        print("Resend API response:", response.status_code, response.text)  
         
         if response.status_code == 200:
             return {'status': 'success'}
         else:
             error_detail = response.text
-            print(f"Error sending email: {error_detail}")  # Debug log
+            print(f"Error sending email: {error_detail}")  
             return {'status': 'error', 'detail': error_detail}
     except Exception as e:
-        print(f"Exception in contact endpoint: {str(e)}")  # Debug log
+        print(f"Exception in contact endpoint: {str(e)}")  
         return {'status': 'error', 'detail': str(e)}
 
 if __name__ == '__main__':
