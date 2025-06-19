@@ -1,4 +1,4 @@
-# signup.py
+
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 import os
@@ -30,7 +30,7 @@ class UpdatePhoneRequest(BaseModel):
 
 @router.post("/signup")
 def signup(user: SignupRequest):
-    email = user.email.lower()  # Normalize email
+    email = user.email.lower()  
     if not email:
         raise HTTPException(status_code=400, detail="Email is required and must be a string.")
     signup_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
@@ -46,13 +46,13 @@ def signup(user: SignupRequest):
 
     id_token = res.json()["idToken"]
 
-    # Send email verification
+    
     verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
     verify_res = requests.post(verify_url, json={"requestType": "VERIFY_EMAIL", "idToken": id_token})
     if verify_res.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to send verification email")
 
-    # Store in Firestore
+    
     collection = "Customer" if user.role.lower() == "customer" else "Driver"
     data = {
         "name": user.name,
