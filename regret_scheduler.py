@@ -17,7 +17,7 @@ def update_pending_to_regret():
             try:
                 booking_date_obj = datetime.strptime(booking_date, "%Y-%m-%d").date()
                 if booking_date_obj < today:
-                    # Update status to regret
+                    
                     trips_ref.child(trip_id).child('status').update({
                         'status': 'regret',
                         'updated_at': datetime.now(ist).isoformat()
@@ -26,5 +26,5 @@ def update_pending_to_regret():
                 print(f"Error updating trip {trip_id}: {e}")
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_pending_to_regret, 'interval', hours=1)  # Runs every hour
+scheduler.add_job(update_pending_to_regret, 'interval', hours=1)  
 scheduler.start() 
