@@ -45,7 +45,6 @@ app.include_router(signup_router)
 app.include_router(book_router)
 app.include_router(trip_history_router)
 app.include_router(driver_router)
-app.include_router(services_router, prefix='/api')
 
 RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 RESEND_API_URL = 'https://api.resend.com/emails'
