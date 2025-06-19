@@ -12,7 +12,7 @@ class TripBookingRequest(BaseModel):
     email: EmailStr
     from_location: str
     to_location: str
-    date: str  # ISO format (YYYY-MM-DD)
+    date: str  
 
 @router.post('/book-trip')
 async def book_trip(request: TripBookingRequest):
@@ -28,7 +28,7 @@ async def book_trip(request: TripBookingRequest):
                 "status": "pending"
             }
         }
-        # Add to Realtime Database with auto-generated key
+        
         trips_ref = db.reference('/trips', url='https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/')
         new_trip_ref = trips_ref.push(booking_data)
         return {
