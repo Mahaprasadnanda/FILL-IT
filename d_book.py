@@ -18,7 +18,7 @@ router = APIRouter()
 RTDB_URL = 'https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/'
 GOOGLE_MAPS_API_KEY = 'AIzaSyAOXzRX48gcKoX4ndad2hcSPQ7hxFfdSJs'
 
-# Helper: Haversine formula for distance in km
+
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371  # Earth radius in km
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -88,7 +88,7 @@ async def search_trips(request: Request, authorization: Optional[str] = Header(N
     driver_from = data.get('from')
     if not driver_from:
         raise HTTPException(status_code=400, detail="Missing from location")
-    # Geocode driver location using Google Maps
+    
     geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={driver_from}&key={GOOGLE_MAPS_API_KEY}'
     geo_res = requests.get(geo_url)
     geo_data = geo_res.json()
@@ -96,7 +96,7 @@ async def search_trips(request: Request, authorization: Optional[str] = Header(N
         raise HTTPException(status_code=400, detail="Could not geocode driver location")
     driver_lat = geo_data['results'][0]['geometry']['location']['lat']
     driver_lon = geo_data['results'][0]['geometry']['location']['lng']
-    # Fetch all trips (no date filter)
+    
     trips_ref = rtdb.reference('/trips', url=RTDB_URL)
     trips = trips_ref.get() or {}
     if isinstance(trips, list):
@@ -109,7 +109,7 @@ async def search_trips(request: Request, authorization: Optional[str] = Header(N
         trip_status = status['status'] if 'status' in status else 'pending'
         if trip_status not in ['pending']:
             continue
-        # Geocode customer from location using Google Maps
+        
         cust_from = trip['from_location'] if 'from_location' in trip else ''
         cust_geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={cust_from}&key={GOOGLE_MAPS_API_KEY}'
         cust_geo_res = requests.get(cust_geo_url)
@@ -122,7 +122,7 @@ async def search_trips(request: Request, authorization: Optional[str] = Header(N
         if dist <= 30:
             customer_email = trip['customer_email'] if 'customer_email' in trip else ''
             customer_phone = trip['customer_phone'] if 'customer_phone' in trip else ''
-            # If phone not in RTDB, fetch from Firestore
+            
             if not customer_phone and customer_email:
                 try:
                     customer_doc = firestore.client().collection('Customer').document(customer_email).get()
@@ -154,12 +154,12 @@ async def accept_trip(request: Request, authorization: Optional[str] = Header(No
     id_token = authorization.replace("Bearer ", "").strip()
     decoded_token = auth.verify_id_token(id_token)
     driver_email = decoded_token.get('email', '').lower()
-    # Get driver details from Firestore
+    
     driver_doc = db.collection('Driver').document(driver_email).get()
     if not driver_doc.exists:
         raise HTTPException(status_code=404, detail="Driver not found")
     driver_data = driver_doc.to_dict()
-    # Update trip in RTDB
+    
     trip_ref = rtdb.reference(f'/trips/{trip_id}', url=RTDB_URL)
     trip_ref.child('status').set({
         'status': 'driver_assigned',
@@ -179,7 +179,7 @@ async def complete_trip(request: Request, authorization: Optional[str] = Header(
         raise HTTPException(status_code=400, detail="Missing trip_id")
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-    # Update trip in RTDB
+    
     trip_ref = rtdb.reference(f'/trips/{trip_id}', url=RTDB_URL)
     trip_ref.child('status').update({
         'status': 'trip_completed',
@@ -251,7 +251,7 @@ async def release_trip(request: Request, authorization: Optional[str] = Header(N
         raise HTTPException(status_code=400, detail="Missing trip_id")
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
-    # Set trip status to pending and remove driver info
+    
     trip_ref = rtdb.reference(f'/trips/{trip_id}', url=RTDB_URL)
     trip_ref.child('status').set({
         'status': 'pending'
