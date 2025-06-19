@@ -128,9 +128,8 @@ def get_profile(
     id_token = authorization.replace("Bearer ", "").strip()
 
     try:
-        
-         decoded_token = auth.verify_id_token(id_token)
-         if decoded_token.get("email").lower() != email.lower():
+        decoded_token = auth.verify_id_token(id_token)
+        if decoded_token.get("email").lower() != email.lower():
             raise HTTPException(status_code=403, detail="Unauthorized email")
 
         customer_ref = db.collection("Customer").document(email.lower()).get()
@@ -146,7 +145,6 @@ def get_profile(
     except Exception as e:
         print(f"Error in get-profile: {str(e)}")
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
-
 
 @router.post("/update-profile")
 async def update_profile(
