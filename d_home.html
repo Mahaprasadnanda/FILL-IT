@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Home - FILLit</title>
+  <link rel="stylesheet" href="d_home.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img src="logo.svg" alt="FILLit Logo" class="logo-img">
+  </div>
+  <div class="header-right">
+    <select class="language-selector" aria-label="Select language" id="languageSelector">
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="or">ଓଡ଼ିଆ (Odia)</option>
+      <option value="bn">বাংলা</option>
+      <option value="te">తెలుగు</option>
+      <option value="ta">தமிழ்</option>
+      <option value="mr">मराठी</option>
+      <option value="gu">ગુજરાતી</option>
+      <option value="kn">ಕನ್ನಡ</option>
+      <option value="ml">മലയാളം</option>
+      <option value="pa">ਪੰਜਾਬੀ</option>
+    </select>
+    <div class="profile">
+      <img src="profile.png" alt="Profile" class="profile-icon">
+      <div class="profile-popup">
+        <div class="profile-header">
+          <img src="profile.png" alt="Profile" class="profile-header-img">
+          <h3 id="profileName"></h3>
+          <p class="profile-email" id="profileEmail"></p>
+        </div>
+        <div class="profile-info">
+          <div class="profile-info-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span class="phone-number" id="profilePhone"></span>
+            <button class="edit-phone-btn" title="Edit phone number">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="phone-edit-form" style="display: none;">
+            <input type="tel" class="phone-input" placeholder="Enter phone number">
+            <div class="phone-edit-actions">
+              <button class="save-phone-btn">Save</button>
+              <button class="cancel-phone-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="profile-divider"></div>
+        <a href="#" class="profile-option" id="historyBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+          </svg>
+          History
+        </a>
+        <div class="profile-divider"></div>
+        <a href="#" class="profile-option sign-out" id="logoutBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="booking-card">
+    <h2>Get A Booking</h2>
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="from">From</label>
+        <input type="text" id="from" name="from" placeholder="Enter pickup location" required>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <div class="date-picker-container">
+          <input type="date"
+                 id="date"
+                 name="date"
+                 required>
+        </div>
+      </div>
+
+      <button type="button" id="searchTripsBtn" class="search-trips-btn">Search Trips</button>
+    </form>
+  </div>
+</main>
+
+<!-- Trip Search Modal -->
+<div id="tripSearchModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content custom-modal">
+    <button id="closeTripModal" class="close-modal">&times;</button>
+    <h2>Nearby Customer Trips</h2>
+    <div id="tripResults"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC4_Aqci9_nRQZeOobtLws-UMdQ2-wZwaw",
+  authDomain: "fill-it-19a6e.firebaseapp.com",
+  projectId: "fill-it-19a6e",
+  storageBucket: "fill-it-19a6e.firebasestorage.app",
+  messagingSenderId: "372445174613",
+  appId: "1:372445174613:web:f2cf03080810b7083f6ddc",
+  measurementId: "G-XB9P25X1P8"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+window.auth = auth;
+</script>
+
+<script>
+  let currentLocation = { lat: 0, lng: 0 };
+  let map;
+
+  function initMap() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      console.error("Map container not found");
+      return;
+    }
+
+    map = new google.maps.Map(mapElement, {
+      center: { lat: 0, lng: 0 },
+      zoom: 8,
+      styles: [
+        {
+          "featureType": "all",
+          "elementType": "all",
+          "stylers": [
+            {
+              "invert_lightness": true
+            },
+            {
+              "saturation": 10
+            },
+            {
+              "lightness": 30
+            },
+            {
+              "gamma": 0.5
+            },
+            {
+              "hue": "#435158"
+            }
+          ]
+        }
+      ]
+    });
+  }
+
+  function getCurrentLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+              (position) => {
+                currentLocation.lat = position.coords.latitude;
+                currentLocation.lng = position.coords.longitude;
+                // Initialize map with current location
+                if (map) {
+                  map.setCenter({ lat: currentLocation.lat, lng: currentLocation.lng });
+                }
+              },
+              (error) => {
+                console.error("Error fetching location:", error);
+              }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }
+
+  // Call this function when the page loads or when you need the location
+  getCurrentLocation();
+
+  // Fetch driver profile data
+  async function fetchDriverProfile() {
+    try {
+      const user = window.auth.currentUser;
+      if (!user) {
+        window.location.href = '/static/welcome.html';
+        return;
+      }
+      const idToken = await user.getIdToken(true);
+      const response = await fetch('https://fill-it.onrender.com/api/driver/profile', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById('profileName').textContent = data.name;
+        document.getElementById('profileEmail').textContent = data.email;
+        document.getElementById('profilePhone').textContent = data.phone;
+      } else {
+        if (response.status === 401) {
+          window.location.href = '/static/welcome.html';
+        } else {
+          console.error('Failed to fetch driver profile');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching driver profile:', error);
+    }
+  }
+
+  // Call fetchDriverProfile when page loads
+  fetchDriverProfile();
+
+  // Set min date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').min = today;
+
+  // Set max date to 1 year from today
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  document.getElementById('date').max = nextYear.toISOString().split('T')[0];
+
+  // Profile popup functionality
+  const profileIcon = document.querySelector('.profile');
+  const profilePopup = document.querySelector('.profile-popup');
+
+  // Toggle popup on profile icon click
+  profileIcon.addEventListener('click', function(e) {
+    e.stopPropagation();
+    profilePopup.classList.toggle('active');
+  });
+
+  // Close popup when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!profileIcon.contains(e.target)) {
+      profilePopup.classList.remove('active');
+    }
+  });
+
+  // Prevent popup from closing when clicking inside it
+  profilePopup.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+
+  // Phone number editing functionality
+  const editPhoneBtn = document.querySelector('.edit-phone-btn');
+  const phoneNumber = document.querySelector('.phone-number');
+  const phoneEditForm = document.querySelector('.phone-edit-form');
+  const phoneInput = document.querySelector('.phone-input');
+  const savePhoneBtn = document.querySelector('.save-phone-btn');
+  const cancelPhoneBtn = document.querySelector('.cancel-phone-btn');
+
+  editPhoneBtn.addEventListener('click', function() {
+    phoneEditForm.style.display = 'block';
+    phoneInput.value = phoneNumber.textContent.trim();
+    phoneInput.focus();
+  });
+
+  savePhoneBtn.addEventListener('click', async function() {
+    const newPhone = phoneInput.value.trim();
+    if (newPhone) {
+      try {
+        const user = window.auth.currentUser;
+        if (!user) {
+          window.location.href = '/static/welcome.html';
+          return;
+        }
+        const idToken = await user.getIdToken(true);
+        const response = await fetch('https://fill-it.onrender.com/api/driver/update_phone', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({ phone: newPhone }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          phoneNumber.textContent = data.phone;
+          phoneEditForm.style.display = 'none';
+          alert('Phone number updated successfully!');
+        } else {
+          const error = await response.json();
+          alert(error.detail || 'Failed to update phone number');
+        }
+      } catch (error) {
+        alert('Failed to update phone number');
+      }
+    }
+  });
+
+  cancelPhoneBtn.addEventListener('click', function() {
+    phoneInput.value = phoneNumber.textContent;
+    phoneEditForm.style.display = 'none';
+  });
+
+  // Language selector functionality
+  const languageSelector = document.getElementById('languageSelector');
+  const translations = {
+    'en': {
+      'title': 'Get A Booking',
+      'from': 'From',
+      'date': 'Date',
+      'bookNow': 'Book Now',
+      'services': 'Services',
+      'history': 'History',
+      'signOut': 'Sign Out',
+      'fromPlaceholder': 'Enter pickup location'
+    },
+    'hi': {
+      'title': 'बुकिंग करें',
+      'from': 'से',
+      'date': 'तारीख',
+      'bookNow': 'अभी बुक करें',
+      'services': 'सेवाएं',
+      'history': 'इतिहास',
+      'signOut': 'साइन आउट',
+      'fromPlaceholder': 'पिकअप स्थान दर्ज करें'
+    },
+    'or': {
+      'title': 'ବୁକିଂ କରନ୍ତୁ',
+      'from': 'ଠାରୁ',
+      'date': 'ତାରିଖ',
+      'bookNow': 'ଏବେ ବୁକ୍ କରନ୍ତୁ',
+      'services': 'ସେବା',
+      'history': 'ଇତିହାସ',
+      'signOut': 'ସାଇନ୍ ଆଉଟ୍',
+      'fromPlaceholder': 'ପିକଅପ ସ୍ଥାନ ଦାଖଲ କରନ୍ତୁ'
+    },
+    'bn': {
+      'title': 'বুকিং করুন',
+      'from': 'থেকে',
+      'date': 'তারিখ',
+      'bookNow': 'এখনই বুক করুন',
+      'services': 'সেবা',
+      'history': 'ইতিহাস',
+      'signOut': 'সাইন আউট',
+      'fromPlaceholder': 'পিকআপ লোকেশন লিখুন'
+    },
+    'te': {
+      'title': 'బుకింగ్ చేయండి',
+      'from': 'నుండి',
+      'date': 'తేదీ',
+      'bookNow': 'ఇప్పుడు బుక్ చేయండి',
+      'services': 'సేవలు',
+      'history': 'చరిత్ర',
+      'signOut': 'సైన్ అవుట్',
+      'fromPlaceholder': 'పికప్ స్థానాన్ని నమోదు చేయండి'
+    },
+    'ta': {
+      'title': 'புக்கிங் செய்யவும்',
+      'from': 'இருந்து',
+      'date': 'தேதி',
+      'bookNow': 'இப்போது புக் செய்யவும்',
+      'services': 'சேவைகள்',
+      'history': 'வரலாறு',
+      'signOut': 'வெளியேறு',
+      'fromPlaceholder': 'பிக்-அப் இடத்தை உள்ளிடவும்'
+    },
+    'mr': {
+      'title': 'बुकिंग करा',
+      'from': 'पासून',
+      'date': 'तारीख',
+      'bookNow': 'आता बुक करा',
+      'services': 'सेवा',
+      'history': 'इतिहास',
+      'signOut': 'साइन आउट',
+      'fromPlaceholder': 'पिकअप स्थान प्रविष्ट करा'
+    },
+    'gu': {
+      'title': 'બુકિંગ કરો',
+      'from': 'થી',
+      'date': 'તારીખ',
+      'bookNow': 'હમણાં બુક કરો',
+      'services': 'સેવા',
+      'history': 'ઇતિહાસ',
+      'signOut': 'સાઇન આઉટ',
+      'fromPlaceholder': 'પિકઅપ સ્થાન દાખલ કરો'
+    },
+    'kn': {
+      'title': 'ಬುಕಿಂಗ್ ಮಾಡಿ',
+      'from': 'ಇಂದ',
+      'date': 'ದಿನಾಂಕ',
+      'bookNow': 'ಈಗ ಬುಕ್ ಮಾಡಿ',
+      'services': 'ಸೇವೆಗಳು',
+      'history': 'ಇತಿಹಾಸ',
+      'signOut': 'ಸೈನ್ ಔಟ್',
+      'fromPlaceholder': 'ಪಿಕಪ್ ಸ್ಥಳವನ್ನು ನಮೂದಿಸಿ'
+    },
+    'ml': {
+      'title': 'ബുക്കിംഗ് ചെയ്യുക',
+      'from': 'നിന്ന്',
+      'date': 'തീയതി',
+      'bookNow': 'ഇപ്പോൾ ബുക്ക് ചെയ്യുക',
+      'services': 'സേവനങ്ങൾ',
+      'history': 'ചരിത്രം',
+      'signOut': 'സൈൻ ഔട്ട്',
+      'fromPlaceholder': 'പിക്കപ്പ് സ്ഥലം നൽകുക'
+    },
+    'pa': {
+      'title': 'ਬੁਕਿੰਗ ਕਰੋ',
+      'from': 'ਤੋਂ',
+      'date': 'ਤਾਰੀਖ',
+      'bookNow': 'ਹੁਣੇ ਬੁਕ ਕਰੋ',
+      'services': 'ਸੇਵਾਵਾਂ',
+      'history': 'ਇਤਿਹਾਸ',
+      'signOut': 'ਸਾਈਨ ਆਉਟ',
+      'fromPlaceholder': 'ਪਿਕਅੱਪ ਸਥਾਨ ਦਰਜ ਕਰੋ'
+    }
+  };
+
+  languageSelector.addEventListener('change', function() {
+    const lang = this.value;
+    const translation = translations[lang] || translations['en'];
+
+    // Update text content
+    document.querySelector('.booking-card h2').textContent = translation.title;
+    document.querySelector('label[for="from"]').textContent = translation.from;
+    document.querySelector('label[for="date"]').textContent = translation.date;
+    document.querySelector('button[type="submit"]').textContent = translation.bookNow;
+    document.getElementById('from').placeholder = translation.fromPlaceholder;
+  });
+
+  // Logout functionality (like c_home.html)
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    localStorage.removeItem('idToken');
+    localStorage.removeItem('email');
+    localStorage.removeItem('refreshToken');
+    // Optionally, clear sessionStorage too
+    sessionStorage.clear();
+    window.location.href = 'welcome.html';
+  });
+
+  // History button functionality
+  document.getElementById('historyBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = 'd_trip.html';
+  });
+
+  // --- Google Places Autocomplete for 'From' field ---
+  function loadGoogleMapsAPI() {
+    return new Promise((resolve, reject) => {
+      if (window.google && window.google.maps) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAOXzRX48gcKoX4ndad2hcSPQ7hxFfdSJs&libraries=places';
+      script.async = true;
+      script.defer = true;
+      script.onerror = reject;
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+  }
+  async function initAutocomplete() {
+    await loadGoogleMapsAPI();
+    new google.maps.places.Autocomplete(document.getElementById('from'), { types: ['geocode'] });
+  }
+  document.addEventListener('DOMContentLoaded', initAutocomplete);
+
+  // --- Trip Search Modal Logic ---
+  const searchTripsBtn = document.getElementById('searchTripsBtn');
+  const tripSearchModal = document.getElementById('tripSearchModal');
+  const closeTripModal = document.getElementById('closeTripModal');
+  const tripResults = document.getElementById('tripResults');
+
+  searchTripsBtn.addEventListener('click', async function() {
+    const from = document.getElementById('from').value;
+    const date = document.getElementById('date').value;
+    if (!from || !date) {
+      alert('Please enter both From location and Date.');
+      return;
+    }
+    // Geocode driver 'from' using Google Maps Geocoding API
+    const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(from)}&key=AIzaSyAOXzRX48gcKoX4ndad2hcSPQ7hxFfdSJs`);
+    const geoData = await geoRes.json();
+    if (!geoData.results || !geoData.results[0]) {
+      alert('Could not geocode the entered location.');
+      return;
+    }
+    const driverLat = geoData.results[0].geometry.location.lat;
+    const driverLng = geoData.results[0].geometry.location.lng;
+    // Fetch customer trips for the date from backend
+    const idToken = localStorage.getItem('idToken');
+    const tripsRes = await fetch(`https://fill-it.onrender.com/api/driver/search_trips`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ from, date })
+    });
+    const tripsData = await tripsRes.json();
+    if (!tripsData.trips || tripsData.trips.length === 0) {
+      tripResults.innerHTML = '<p style="color:#fff;">No trips found within 30km radius for the selected date.</p>';
+      tripSearchModal.style.display = 'block';
+      return;
+    }
+    // Render trips in the modal
+    tripResults.innerHTML = tripsData.trips.map(trip => `
+    <div class="trip-popup-card">
+      <div class="trip-popup-details">
+        <p><strong>From:</strong> ${trip.from_location}</p>
+        <p><strong>To:</strong> ${trip.to_location}</p>
+        <p><strong>Date:</strong> ${trip.date}</p>
+        <p><strong>Customer Email:</strong> ${trip.customer_email}</p>
+        <p><strong>Customer Phone:</strong> ${trip.customer_phone || 'N/A'}</p>
+      </div>
+      <div class="trip-popup-actions">
+        <button class="accept-trip-btn" data-trip-id="${trip.trip_id}">Accept</button>
+      </div>
+    </div>
+  `).join('');
+    tripSearchModal.style.display = 'block';
+  });
+
+  closeTripModal.addEventListener('click', function() {
+    tripSearchModal.style.display = 'none';
+  });
+
+  // Accept trip logic
+  tripResults.addEventListener('click', async function(e) {
+    if (e.target.classList.contains('accept-trip-btn')) {
+      const tripId = e.target.getAttribute('data-trip-id');
+      const idToken = localStorage.getItem('idToken');
+      // Call backend to assign driver and update status
+      const res = await fetch(`https://fill-it.onrender.com/api/driver/accept_trip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ trip_id: tripId })
+      });
+      if (res.ok) {
+        alert('Trip accepted! The customer will now see your details.');
+        tripSearchModal.style.display = 'none';
+        window.location.href = 'd_trip.html'; // Redirect to assigned trips page
+      } else {
+        alert('Failed to accept trip. Please try again.');
+      }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,825 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #344de3;
+  --secondary-color: #b4092e;
+  --background: #141A1F;
+  --card-bg: #1F262E;
+  --text-color: #FFFFFF;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --transition: all 0.3s ease;
+}
+
+/* ===== Reset and Base Styling ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text-color);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ===== Header/Navbar ===== */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  transition: var(--transition);
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.header-right {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ===== Language Selector ===== */
+.language-selector {
+  z-index: 900;
+  position: relative;
+  margin-right: 12px;
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  background-image: url("language.png");
+  background-repeat: no-repeat;
+  background-position: 0.5rem center;
+  background-size: 1.2rem;
+  min-width: 120px;
+}
+
+.language-selector:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(71, 98, 255, 0.1);
+}
+
+.language-selector option {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.language-selector:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(71, 98, 255, 0.1);
+}
+
+/* ===== Profile Section ===== */
+.profile-icon {
+  z-index: 1100 !important;
+  position: relative !important;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color);
+  background-color: var(--card-bg);
+  object-fit: cover;
+  cursor: pointer;
+  padding: 2px;
+  transition: var(--transition);
+}
+
+.profile-icon:hover {
+  transform: scale(1.1);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 15px rgba(180, 9, 46, 0.3);
+}
+
+.profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-popup {
+  display: none;
+}
+
+.profile-popup.active {
+  display: block;
+}
+
+.profile-popup::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--card-bg);
+  transform: rotate(45deg);
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.profile-header {
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(to bottom, rgba(52, 77, 227, 0.1), transparent);
+}
+
+.profile-header-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  padding: 3px;
+  background-color: var(--card-bg);
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+.profile-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.profile-email {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.5rem;
+}
+
+/* ===== Profile Info Section ===== */
+.profile-info {
+  padding: 1rem 1.5rem;
+}
+
+.profile-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.profile-info-item svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.edit-phone-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.profile-info-item:hover .edit-phone-btn {
+  opacity: 0.7;
+}
+
+.edit-phone-btn:hover {
+  opacity: 1 !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+}
+
+/* ===== Phone Edit Section ===== */
+.phone-edit-form {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.phone-input {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+.phone-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 77, 227, 0.2);
+}
+
+.phone-edit-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.phone-edit-actions button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.save-phone-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.save-phone-btn:hover {
+  background-color: #2a3db5;
+}
+
+.cancel-phone-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+.cancel-phone-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ===== Profile Options ===== */
+.profile-option {
+  padding: 0.9rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+.profile-option:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--primary-color);
+}
+
+.profile-option svg {
+  width: 20px;
+  height: 20px;
+  transition: var(--transition);
+  opacity: 0.9;
+}
+
+.profile-option:hover svg {
+  transform: scale(1.1);
+  color: var(--primary-color);
+}
+
+.profile-option.sign-out {
+  color: #ff4d4d;
+}
+
+.profile-option.sign-out:hover {
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+.profile-option.sign-out:hover svg {
+  color: #ff4d4d;
+}
+
+.profile-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  opacity: 0.5;
+}
+
+/* ===== Animation ===== */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Main Section for Page Content ===== */
+main {
+  padding: 2rem 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* ===== Trip Cards ===== */
+.trips-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 1rem;
+  margin-right: -1rem;
+}
+
+.trips-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.trips-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trips-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.trips-container::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+.trip-card {
+  background-color: var(--card-bg);
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: var(--transition);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  position: relative;
+}
+
+.trip-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+}
+
+.trip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+.trip-card p {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  line-height: 1.5;
+}
+
+.trip-card p strong {
+  font-weight: 600;
+  font-size: 0.95rem;
+  min-width: 120px;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.trip-card p:first-child {
+  grid-column: 1 / -1;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.trip-card p:first-child strong {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  text-transform: uppercase;
+}
+
+.trip-card p:last-child {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.trip-card p:last-child strong {
+  color: var(--secondary-color);
+}
+
+/* ===== Responsive Layout ===== */
+@media (max-width: 900px) {
+  .trip-card {
+    width: 95%;
+    min-width: 320px;
+    max-width: 600px;
+    margin: 1.2rem auto;
+    padding: 1.5rem 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 1rem 3%;
+  }
+  .logo-img {
+    height: 32px;
+  }
+  .header-right {
+    gap: 1rem;
+  }
+  .language-selector {
+    min-width: 100px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem 0.4rem 2rem;
+    background-size: 1rem;
+  }
+  .profile-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .trips-container {
+    padding: 1rem 0.5rem;
+  }
+  .trip-card {
+    width: 98%;
+    min-width: 260px;
+    max-width: 480px;
+    padding: 1.2rem 0.8rem;
+    margin: 1rem auto;
+    border-radius: 16px;
+  }
+  .trip-card p {
+    font-size: 0.97rem;
+  }
+  .trip-info-item, .trip-details p {
+    font-size: 0.95rem;
+  }
+  .profile-popup {
+    width: 220px;
+    right: -5px;
+  }
+}
+
+@media (max-width: 500px) {
+  header {
+    min-height: 56px;
+    padding: 0.7rem 2% !important;
+    overflow: visible !important;
+    z-index: 100;
+  }
+  .header-right {
+    align-items: center;
+    overflow: visible !important;
+    z-index: 101;
+  }
+  .profile-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    position: static !important;
+    z-index: 102;
+  }
+  .logo-img {
+    height: 26px;
+  }
+  .header-right {
+    gap: 0.7rem;
+  }
+  .language-selector {
+    min-width: 80px;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem 0.3rem 1.5rem;
+    background-size: 0.8rem;
+  }
+  .trips-container {
+    overflow-x: auto;
+    padding: 0.5rem 0.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .trip-card {
+    width: 95vw;
+    min-width: 220px;
+    max-width: 95vw;
+    margin: 0.7rem auto;
+    border-radius: 14px;
+    font-size: 0.97rem;
+    background: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    word-break: break-word;
+    padding: 1rem 0.7rem;
+    padding-left: 10px;
+  }
+  .trip-card h3, .trip-card h4 {
+    font-size: 1.1rem;
+    text-align: left;
+    margin-bottom: 0.5rem;
+  }
+  .trip-card p, .trip-info-item, .trip-details p {
+    font-size: 0.97rem;
+    text-align: left;
+    word-break: break-word;
+    white-space: pre-line;
+    margin-bottom: 0.3rem;
+    margin-top: 0.1rem;
+    padding: 0.1rem 0;
+    display: block;
+  }
+  .trip-card p strong, .trip-info-item strong, .trip-details p strong {
+    font-weight: 600;
+    margin-bottom: 0.05rem;
+    color: var(--primary-color);
+    display: inline;
+  }
+  .trip-card p, .trip-card span, .trip-card strong {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  header, .header-right, .profile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 10;
+  }
+  .profile-popup {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 15px) !important;
+    right: -10px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 260px !important;
+    min-width: 180px !important;
+    max-width: 90vw !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    padding: 1.2rem 0.8rem 1.2rem 0.8rem;
+    z-index: 3000;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card-bg);
+    height: auto !important;
+    overflow-y: visible !important;
+    animation: none !important;
+  }
+  .profile-popup.active {
+    display: block !important;
+  }
+  .profile-header {
+    padding: 1.2rem 0.5rem 0.7rem 0.5rem;
+    text-align: center;
+    width: 100%;
+  }
+  .profile-header-img {
+    margin: 0 auto 0.7rem auto;
+    display: block;
+    width: 70px;
+    height: 70px;
+  }
+  .profile-header h3,
+  .profile-email {
+    text-align: center;
+    word-break: break-word;
+  }
+  .profile-info {
+    padding: 0.7rem 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+  .profile-option {
+    text-align: center;
+    padding: 0.7rem 0;
+    font-size: 1.1rem;
+    width: 100%;
+  }
+  .profile-divider {
+    margin: 0.5rem 0;
+  }
+}
+
+@media (max-width: 360px) {
+  header {
+    padding: 0.6rem 1%;
+  }
+  .logo-img {
+    height: 20px;
+  }
+  .header-right {
+    gap: 0.5rem;
+  }
+  .language-selector {
+    min-width: 60px;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem 0.2rem 1rem;
+    background-size: 0.6rem;
+  }
+  .profile-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .trips-container {
+    padding: 0.2rem 0.1rem;
+  }
+  .trip-card {
+    width: 100vw;
+    min-width: 120px;
+    max-width: 100vw;
+    padding: 0.7rem 0.2rem;
+    margin: 0.4rem auto;
+    border-radius: 8px;
+  }
+  .trip-card h3, .trip-card h4 {
+    font-size: 1rem;
+  }
+  .trip-card p {
+    font-size: 0.8rem;
+  }
+  .trip-info-item, .trip-details p {
+    font-size: 0.8rem;
+  }
+  .profile-popup {
+    width: 110px;
+    right: 0;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .profile-icon:hover,
+  .trip-card:hover,
+  .edit-trip-btn:hover,
+  .complete-trip-btn:hover,
+  .release-trip-btn:hover {
+    transform: none;
+    opacity: 1;
+  }
+  .profile-icon:active,
+  .trip-card:active,
+  .edit-trip-btn:active,
+  .complete-trip-btn:active,
+  .release-trip-btn:active {
+    opacity: 0.8;
+  }
+}
+
+/* Improve tap target sizes for mobile */
+button,
+a,
+input[type="submit"],
+.profile-icon {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Add smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+/* Improve form accessibility */
+.trip-card input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Add transition for smoother animations */
+.trip-card,
+.trip-card input,
+.trip-card button,
+.profile-icon,
+.language-selector {
+  transition: var(--transition);
+}
+
+.complete-trip-btn {
+  background: linear-gradient(90deg, #00C853, #344de3);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-right: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(0,200,83,0.08);
+  letter-spacing: 0.5px;
+}
+.complete-trip-btn:hover {
+  background: linear-gradient(90deg, #344de3, #00C853);
+  box-shadow: 0 4px 16px rgba(0,200,83,0.18);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.release-trip-btn {
+  background: linear-gradient(90deg, #b4092e, #344de3);
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  box-shadow: 0 2px 8px rgba(180,9,46,0.08);
+  letter-spacing: 0.5px;
+}
+.release-trip-btn:hover {
+  background: linear-gradient(90deg, #344de3, #b4092e);
+  box-shadow: 0 4px 16px rgba(180,9,46,0.18);
+  transform: translateY(-2px) scale(1.03);
+}
+
+@media (min-width: 501px) {
+  .profile-icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  .profile-popup {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: -10px;
+    left: auto;
+    bottom: auto;
+    width: 280px;
+    max-width: 90vw;
+    min-width: 180px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    padding: 1.2rem 0.8rem 1.2rem 0.8rem;
+    z-index: 3000;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card-bg);
+    height: auto;
+    overflow-y: visible;
+    animation: none;
+    display: none;
+  }
+  .profile-popup.active {
+    display: block;
+  }
+}
+
+.profile-popup .profile-email,
+.profile-popup p,
+.profile-popup span,
+.profile-popup strong {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+

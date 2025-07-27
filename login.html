@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+        import {
+            getAuth,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4_Aqci9_nRQZeOobtLws-UMdQ2-wZwaw",
+            authDomain: "fill-it-19a6e.firebaseapp.com",
+            projectId: "fill-it-19a6e",
+            storageBucket: "fill-it-19a6e.firebasestorage.app",
+            messagingSenderId: "372445174613",
+            appId: "1:372445174613:web:f2cf03080810b7083f6ddc",
+            measurementId: "G-XB9P25X1P8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.handleGoogleLogin = async function () {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const email = user.email.toLowerCase();
+                const idToken = await user.getIdToken();
+                const refreshToken = result._tokenResponse.refreshToken; // Get refresh token
+                console.log('Google Sign-In - Email:', email, 'ID Token:', idToken ? 'Present' : 'Missing');
+
+                if (!idToken) {
+                    throw new Error('Failed to retrieve ID token from Google Sign-In');
+                }
+
+                // Save to localStorage
+                localStorage.setItem('email', email);
+                localStorage.setItem('idToken', idToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                console.log('Saved to localStorage:', { email, idToken: idToken ? 'Present' : 'Missing', refreshToken: refreshToken ? 'Present' : 'Missing' });
+
+                // Send email to backend to get role
+                const roleRes = await fetch(`https://fill-it.onrender.com/get-role?email=${encodeURIComponent(email)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
+                const roleData = await roleRes.json();
+
+                if (roleRes.ok) {
+                    const role = roleData.role;
+                    if (role === "driver") {
+                        window.location.href = "d_home.html";
+                    } else if (role === "customer") {
+                        window.location.href = "c_home.html";
+                    } else {
+                        alert("Unknown role. Please contact support.");
+                    }
+                } else {
+                    alert(roleData.detail || "Unable to fetch role.");
+                }
+            } catch (error) {
+                console.error("Google Sign-In Error:", error);
+                alert("Google Sign-In failed: " + error.message);
+            }
+        };
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <div class="left-panel">
+        <img src="truck-logistics-operations-dusk.jpg" alt="Delivery Illustration" class="panel-image">
+    </div>
+    <div class="right-panel">
+        <div class="login-box">
+            <h2>Sign in</h2>
+            <p>Enter your credentials to access your account</p>
+
+            <form id="login-form">
+                <div class="input-container">
+                    <img src="user-icon.svg" alt="User" class="input-icon">
+                    <input type="email" id="email" class="input-field" placeholder="Email" required>
+                </div>
+                <div class="input-container">
+                    <img src="lock-icon.svg" alt="Lock" class="input-icon">
+                    <input type="password" id="password" class="input-field password-field" placeholder="Password" required>
+                    <img src="eye-slash-icon.svg" alt="Toggle Password" class="toggle-password" style="cursor: pointer;">
+                </div>
+
+                <button type="submit" class="login-button">LOGIN</button>
+            </form>
+
+            <div class="forgot">Forgot Password?</div>
+
+            <div class="login-via">
+                <span>Login Via</span>
+                <div class="icons">
+                    <img src="https://cdn-icons-png.flaticon.com/512/300/300221.png" alt="Google" class="social-icon" style="cursor: pointer;" onclick="handleGoogleLogin()">
+                    <img src="https://cdn-icons-png.flaticon.com/512/732/732221.png" alt="Microsoft" class="social-icon" title="Coming soon">
+                    <img src="apple-icon.svg" alt="Apple Logo" class="social-icon" title="Coming soon">
+                </div>
+            </div>
+
+            <div class="create-account"><a href="signup.html">Create an account</a></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const togglePassword = document.querySelector('.toggle-password');
+        const passwordInput = document.querySelector('.password-field');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.src = type === 'password' ? 'eye-slash-icon.svg' : 'eye-icon.svg';
+        });
+
+        const form = document.getElementById('login-form');
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+
+            try {
+                const loginResponse = await fetch('https://fill-it.onrender.com/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const loginData = await loginResponse.json();
+                if (!loginResponse.ok) {
+                    alert(loginData.detail || 'Login failed');
+                    return;
+                }
+
+                console.log('Email/Password Login - Email:', loginData.email, 'ID Token:', loginData.idToken ? 'Present' : 'Missing');
+
+                if (!loginData.idToken) {
+                    throw new Error('Failed to retrieve ID token from backend');
+                }
+
+                // Save to localStorage
+                localStorage.setItem('email', loginData.email);
+                localStorage.setItem('idToken', loginData.idToken);
+                localStorage.setItem('refreshToken', loginData.refreshToken);
+                console.log('Saved to localStorage:', { email: loginData.email, idToken: loginData.idToken ? 'Present' : 'Missing', refreshToken: loginData.refreshToken ? 'Present' : 'Missing' });
+
+                const roleResponse = await fetch(`https://fill-it.onrender.com/get-role?email=${encodeURIComponent(email)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${loginData.idToken}`
+                    }
+                });
+                const roleData = await roleResponse.json();
+
+                if (roleResponse.ok) {
+                    const role = roleData.role;
+                    if (role === 'driver') {
+                        window.location.href = 'd_home.html';
+                    } else if (role === 'customer') {
+                        window.location.href = 'c_home.html';
+                    } else {
+                        alert('Unknown role. Please contact support.');
+                    }
+                } else {
+                    alert(roleData.detail || 'Failed to fetch user role.');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Error: ' + error.message);
+            }
+        });
+    });
+</script>
+</body>
+</html>

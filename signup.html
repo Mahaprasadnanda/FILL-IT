@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up Page</title>
+  <link rel="stylesheet" href="signup.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <div class="left-panel">
+    <img src="2151919261.jpg" alt="Delivery Illustration" class="panel-image">
+  </div>
+  <div class="right-panel">
+    <div class="signup-box">
+      <h2>Sign Up</h2>
+      <p>Create your account to get started</p>
+      <form id="signup-form">
+        <div class="input-container">
+          <img src="user-icon.svg" alt="User" class="input-icon">
+          <input type="text" class="input-field" placeholder="Name" id="name" required>
+        </div>
+        <div class="input-container">
+          <img src="mail-icon.svg" alt="Email" class="input-icon">
+          <input type="email" class="input-field" placeholder="Email" id="email" required>
+        </div>
+        <div class="input-container">
+          <img src="phone-icon.svg" alt="Phone" class="input-icon">
+          <input type="text" class="input-field" placeholder="Phone Number" id="phone" required>
+        </div>
+        <div class="input-container">
+          <img src="user-icon.svg" alt="Role" class="input-icon">
+          <select class="input-field" id="role" required>
+            <option value="" disabled selected>Select Role</option>
+            <option value="customer">Customer</option>
+            <option value="driver">Driver</option>
+          </select>
+        </div>
+        <div class="input-container" id="vehicle-fields" style="display: none;">
+          <img src="lock-icon.svg" alt="Vehicle" class="input-icon">
+          <input type="text" class="input-field" placeholder="Vehicle Number" id="vehicle-number">
+        </div>
+        <div class="input-container" id="chassis-fields" style="display: none;">
+          <img src="lock-icon.svg" alt="Chassis" class="input-icon">
+          <input type="text" class="input-field" placeholder="Vehicle Chassis Number" id="vehicle-chassis">
+        </div>
+        <div class="input-container">
+          <img src="lock-icon.svg" alt="Lock" class="input-icon">
+          <input type="password" class="input-field password-field" placeholder="Password" id="password" required>
+          <img src="eye-slash-icon.svg" alt="Toggle Password" class="toggle-password" style="cursor: pointer;">
+        </div>
+        <div class="input-container">
+          <img src="lock-icon.svg" alt="Lock" class="input-icon">
+          <input type="password" class="input-field password-field" placeholder="Confirm Password" id="confirm-password" required>
+          <img src="eye-slash-icon.svg" alt="Toggle Password" class="toggle-password" style="cursor: pointer;">
+        </div>
+        <button type="submit" class="signup-button">Sign Up</button>
+      </form>
+      <div class="login-prompt">Already have an account? <a href="login.html">Sign In</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const togglePasswordIcons = document.querySelectorAll('.toggle-password');
+    togglePasswordIcons.forEach(togglePassword => {
+      togglePassword.addEventListener('click', function () {
+        const passwordField = this.previousElementSibling;
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.src = type === 'password' ? 'eye-slash-icon.svg' : 'eye-icon.svg';
+      });
+    });
+
+    const form = document.getElementById('signup-form');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const role = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const vehicleNumber = document.getElementById('vehicle-number').value.trim();
+      const vehicleChassis = document.getElementById('vehicle-chassis').value.trim();
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      try {
+        const response = await fetch('https://fill-it.onrender.com/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            password,
+            role,
+            vehicle_number: role === 'driver' ? vehicleNumber : undefined,
+            vehicle_chassis: role === 'driver' ? vehicleChassis : undefined
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('Verification email sent to your email. Please verify and then sign in.');
+          window.location.href = 'login.html';
+        } else {
+          alert(data.detail || 'Signup failed');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    const roleSelect = document.getElementById('role');
+    const vehicleFields = document.getElementById('vehicle-fields');
+    const chassisFields = document.getElementById('chassis-fields');
+    roleSelect.addEventListener('change', function() {
+      if (this.value === 'driver') {
+        vehicleFields.style.display = '';
+        chassisFields.style.display = '';
+      } else {
+        vehicleFields.style.display = 'none';
+        chassisFields.style.display = 'none';
+      }
+    });
+  });
+</script>
+</body>
+</html>

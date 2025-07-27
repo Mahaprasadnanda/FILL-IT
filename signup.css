@@ -1,0 +1,553 @@
+/* Base styles */
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #141A1F;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+.container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    height: 80%;
+    width: 1px;
+    background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0)
+    );
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.left-panel {
+    flex: 0.6;
+    min-width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1A1F24;
+    overflow: hidden;
+    position: relative;
+}
+
+.panel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.left-panel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.2));
+    pointer-events: none;
+}
+
+.right-panel {
+    flex: 0.4;
+    min-width: 40%;
+    background-color: #141A1F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signup-box {
+    width: 85%;
+    max-width: 320px;
+    background-color: #1F262E;
+    border-radius: 15px;
+    padding: 30px 25px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.signup-box h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #FFFFFF;
+}
+
+.signup-box p {
+    font-size: 13px;
+    margin-bottom: 20px;
+    color: #A0A0A0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.input-container {
+    position: relative;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border-radius: 8px;
+    border: 1px solid #3A4451;
+    background-color: #2A3238;
+    color: white;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.input-field::placeholder {
+    color: #707070;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #6C5CE7;
+    box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+    background-color: #2A3238;
+}
+
+.input-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%23707070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 15px center;
+    background-size: 12px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.toggle-password:hover {
+    opacity: 1;
+}
+
+.signup-button {
+    width: 100%;
+    height: 40px;
+    padding: 0;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ab154e;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(234, 76, 137, 0.2);
+}
+
+.signup-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(234, 76, 137, 0.3);
+    background-color: #d13a76;
+}
+
+.signup-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(234, 76, 137, 0.2);
+}
+
+.signup-via {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(58, 68, 81, 0.2);
+}
+
+.signup-via span {
+    font-size: 12px;
+    color: #A0A0A0;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    opacity: 0.7;
+}
+
+.social-icon:hover {
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.login-prompt {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #A0A0A0;
+    cursor: pointer;
+    text-align: center;
+}
+
+.login-prompt a {
+    color: #EA4C89;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-prompt a:hover {
+    text-decoration: underline;
+    color: #d13a76;
+}
+
+/* Enhanced responsive styles */
+@media screen and (max-width: 1200px) {
+    .container::after {
+        left: 55%;
+    }
+
+    .signup-box {
+        width: 90%;
+        max-width: 380px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .container::after {
+        left: 50%;
+    }
+
+    .left-panel {
+        flex: 0.5;
+        min-width: 50%;
+    }
+
+    .right-panel {
+        flex: 0.5;
+        min-width: 50%;
+    }
+
+    .signup-box {
+        width: 95%;
+        max-width: 360px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .container::after {
+        display: none;
+    }
+
+    .left-panel {
+        flex: 0.4;
+        min-height: 40vh;
+        min-width: 100%;
+    }
+
+    .right-panel {
+        flex: 0.6;
+        min-height: 60vh;
+        min-width: 100%;
+        padding: 2rem 0;
+    }
+
+    .signup-box {
+        width: 90%;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 25px 20px;
+    }
+
+    .signup-box h2 {
+        font-size: 22px;
+    }
+
+    .signup-box p {
+        font-size: 12px;
+    }
+
+    .input-field {
+        padding: 12px 15px 12px 40px;
+        font-size: 14px;
+    }
+
+    .input-icon, .toggle-password {
+        width: 18px;
+        height: 18px;
+    }
+
+    .signup-button {
+        height: 44px;
+        font-size: 14px;
+    }
+
+    .social-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .signup-via span, .login-prompt {
+        font-size: 11px;
+    }
+
+    .icons {
+        gap: 12px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .left-panel {
+        min-height: 35vh;
+    }
+
+    .right-panel {
+        min-height: 65vh;
+        padding: 1.5rem 0;
+    }
+
+    .signup-box {
+        width: 95%;
+        max-width: 320px;
+        padding: 20px 15px;
+    }
+
+    .signup-box h2 {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+
+    .signup-box p {
+        font-size: 11px;
+        margin-bottom: 15px;
+    }
+
+    .input-field {
+        padding: 10px 15px 10px 35px;
+        font-size: 13px;
+        border-radius: 6px;
+    }
+
+    .input-field select {
+        padding-right: 30px;
+        background-size: 10px;
+    }
+
+    .input-icon, .toggle-password {
+        width: 16px;
+        height: 16px;
+        left: 12px;
+    }
+
+    .toggle-password {
+        right: 12px;
+    }
+
+    .signup-button {
+        height: 42px;
+        font-size: 13px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .social-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .signup-via span, .login-prompt {
+        font-size: 10px;
+    }
+
+    .icons {
+        gap: 10px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .left-panel {
+        min-height: 30vh;
+    }
+
+    .right-panel {
+        min-height: 70vh;
+        padding: 1rem 0;
+    }
+
+    .signup-box {
+        padding: 15px 12px;
+    }
+
+    .signup-box h2 {
+        font-size: 18px;
+    }
+
+    .signup-box p {
+        font-size: 10px;
+    }
+
+    .input-field {
+        padding: 9px 12px 9px 32px;
+        font-size: 12px;
+    }
+
+    .input-icon, .toggle-password {
+        width: 15px;
+        height: 15px;
+    }
+
+    .signup-button {
+        height: 40px;
+        font-size: 12px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+    .signup-button:hover,
+    .social-icon:hover,
+    .login-prompt a:hover {
+        transform: none;
+    }
+
+    .signup-button:active,
+    .social-icon:active {
+        opacity: 0.8;
+    }
+
+    .input-field:focus {
+        box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.15);
+    }
+}
+
+/* Improve tap target sizes for mobile */
+button,
+a,
+input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Remove minimum size for social icons */
+.social-icon {
+    min-height: unset;
+    min-width: unset;
+}
+
+/* Add smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    select,
+    textarea,
+    input {
+        font-size: 16px;
+    }
+}
+
+/* Improve form accessibility */
+.input-field:focus-visible {
+    outline: 2px solid #6C5CE7;
+    outline-offset: 2px;
+}
+
+/* Add loading state styles */
+.signup-button.loading {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+/* Improve error state visibility */
+.input-field.error {
+    border-color: #ff4757;
+}
+
+.error-message {
+    color: #ff4757;
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
+    width: 100%;
+}
+
+/* Add transition for smoother animations */
+.signup-box,
+.input-field,
+.signup-button,
+.social-icon {
+    transition: all 0.3s ease;
+}

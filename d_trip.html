@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip History</title>
+    <link rel="stylesheet" href="d_trip.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+    <div class="logo">
+        <img src="logo.svg" alt="FILLit Logo" class="logo-img">
+    </div>
+    <div class="header-right" style="min-width: 120px;">
+        <select class="language-selector" aria-label="Select language" id="languageSelector">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+            <option value="bn">বাংলা</option>
+            <option value="te">తెలుగు</option>
+            <option value="ta">தமிழ்</option>
+            <option value="mr">मराठी</option>
+            <option value="gu">ગુજરાતી</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ml">മലയാളം</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+        </select>
+        <div class="profile">
+            <img src="profile.png" alt="Profile" class="profile-icon" style="width:32px;height:32px;min-width:32px;min-height:32px;display:inline-block;">
+            <div class="profile-popup">
+                <div class="profile-header">
+                    <img src="profile.png" alt="Profile" class="profile-header-img">
+                    <h3 id="profileName">Loading...</h3>
+                    <p class="profile-email" id="profileEmail">Loading...</p>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <span class="phone-number" id="profilePhone">Loading...</span>
+                        <button class="edit-phone-btn" title="Edit phone number">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="phone-edit-form" style="display: none;">
+                        <input type="tel" class="phone-input" placeholder="Enter phone number">
+                        <div class="phone-edit-actions">
+                            <button class="save-phone-btn">Save</button>
+                            <button class="cancel-phone-btn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-divider"></div>
+                <a href="d_home.html" class="profile-option" id="homeBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+                    </svg>
+                    Home
+                </a>
+                <div class="profile-divider"></div>
+                <a href="#" class="profile-option sign-out" id="logoutBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sign Out
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+<main>
+    <h1>Trip List :</h1>
+    <div class="trips-container" id="tripsContainer"></div>
+</main>
+<script>
+    // Profile popup functionality
+    const profileIcon = document.querySelector('.profile');
+    const profilePopup = document.querySelector('.profile-popup');
+
+    // Toggle popup on profile icon click
+    profileIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        profilePopup.classList.toggle('active');
+    });
+
+    // Close popup when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!profileIcon.contains(e.target)) {
+            profilePopup.classList.remove('active');
+        }
+    });
+
+    // Prevent popup from closing when clicking inside it
+    profilePopup.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Phone number editing functionality
+    const editPhoneBtn = document.querySelector('.edit-phone-btn');
+    const phoneNumber = document.querySelector('.phone-number');
+    const phoneEditForm = document.querySelector('.phone-edit-form');
+    const phoneInput = document.querySelector('.phone-input');
+    const savePhoneBtn = document.querySelector('.save-phone-btn');
+    const cancelPhoneBtn = document.querySelector('.cancel-phone-btn');
+
+    editPhoneBtn.addEventListener('click', function() {
+        phoneEditForm.style.display = 'block';
+        phoneInput.focus();
+    });
+
+    // Language translations
+    const translations = {
+        en: {
+            tripList: "Trip List :",
+            home: "Home",
+            signOut: "Sign Out",
+            phonePlaceholder: "Enter phone number",
+            save: "Save",
+            cancel: "Cancel",
+            editPhone: "Edit phone number"
+        },
+        hi: {
+            tripList: "यात्रा सूची :",
+            home: "होम",
+            signOut: "साइन आउट",
+            phonePlaceholder: "फोन नंबर दर्ज करें",
+            save: "सहेजें",
+            cancel: "रद्द करें",
+            editPhone: "फोन नंबर संपादित करें"
+        },
+        or: {
+            tripList: "ଯାତ୍ରା ତାଲିକା :",
+            home: "ହୋମ୍",
+            signOut: "ସାଇନ୍ ଆଉଟ୍",
+            phonePlaceholder: "ଫୋନ୍ ନମ୍ବର୍ ଦାଖଲ କରନ୍ତୁ",
+            save: "ସଞ୍ଚୟ କରନ୍ତୁ",
+            cancel: "ବାତିଲ୍ କରନ୍ତୁ",
+            editPhone: "ଫୋନ୍ ନମ୍ବର୍ ସମ୍ପାଦନ କରନ୍ତୁ"
+        },
+        bn: {
+            tripList: "ট্রিপ তালিকা :",
+            home: "হোম",
+            signOut: "সাইন আউট",
+            phonePlaceholder: "ফোন নম্বর লিখুন",
+            save: "সংরক্ষণ করুন",
+            cancel: "বাতিল করুন",
+            editPhone: "ফোন নম্বর সম্পাদনা করুন"
+        },
+        te: {
+            tripList: "ప్రయాణ జాబితా :",
+            home: "హోమ్",
+            signOut: "సైన్ అవుట్",
+            phonePlaceholder: "ఫోన్ నంబర్ నమోదు చేయండి",
+            save: "సేవ్ చేయండి",
+            cancel: "రద్దు చేయండి",
+            editPhone: "ఫోన్ నంబర్ సవరించండి"
+        },
+        ta: {
+            tripList: "பயண பட்டியல் :",
+            home: "முகப்பு",
+            signOut: "வெளியேறு",
+            phonePlaceholder: "தொலைபேசி எண்ணை உள்ளிடவும்",
+            save: "சேமிக்கவும்",
+            cancel: "ரத்து செய்யவும்",
+            editPhone: "தொலைபேசி எண்ணை திருத்தவும்"
+        },
+        mr: {
+            tripList: "प्रवास यादी :",
+            home: "होम",
+            signOut: "साइन आउट",
+            phonePlaceholder: "फोन नंबर प्रविष्ट करा",
+            save: "जतन करा",
+            cancel: "रद्द करा",
+            editPhone: "फोन नंबर संपादित करा"
+        },
+        gu: {
+            tripList: "પ્રવાસ યાદી :",
+            home: "હોમ",
+            signOut: "સાઇન આઉટ",
+            phonePlaceholder: "ફોન નંબર દાખલ કરો",
+            save: "સેવ કરો",
+            cancel: "રદ કરો",
+            editPhone: "ફોન નંબર સંપાદિત કરો"
+        },
+        kn: {
+            tripList: "ಪ್ರಯಾಣ ಪಟ್ಟಿ :",
+            home: "ಮುಖಪುಟ",
+            signOut: "ಸೈನ್ ಔಟ್",
+            phonePlaceholder: "ಫೋನ್ ಸಂಖ್ಯೆ ನಮೂದಿಸಿ",
+            save: "ಉಳಿಸಿ",
+            cancel: "ರದ್ದುಮಾಡಿ",
+            editPhone: "ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ಸಂಪಾದಿಸಿ"
+        },
+        ml: {
+            tripList: "യാത്രാ പട്ടിക :",
+            home: "ഹോം",
+            signOut: "സൈൻ ഔട്ട്",
+            phonePlaceholder: "ഫോൺ നമ്പർ നൽകുക",
+            save: "സേവ് ചെയ്യുക",
+            cancel: "റദ്ദാക്കുക",
+            editPhone: "ഫോൺ നമ്പർ തിരുത്തുക"
+        },
+        pa: {
+            tripList: "ਯਾਤਰਾ ਸੂਚੀ :",
+            home: "ਘਰ",
+            signOut: "ਸਾਈਨ ਆਉਟ",
+            phonePlaceholder: "ਫੋਨ ਨੰਬਰ ਦਰਜ ਕਰੋ",
+            save: "ਸੇਵ ਕਰੋ",
+            cancel: "ਰੱਦ ਕਰੋ",
+            editPhone: "ਫੋਨ ਨੰਬਰ ਸੋਧੋ"
+        }
+    };
+
+    const languageSelector = document.getElementById('languageSelector');
+    languageSelector.addEventListener('change', function() {
+        const lang = this.value;
+        const t = translations[lang] || translations['en'];
+        document.querySelector('h1').textContent = t.tripList;
+        document.getElementById('homeBtn').innerHTML = `<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z\"></path></svg> ${t.home}`;
+        document.getElementById('logoutBtn').innerHTML = `<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"></path><polyline points=\"16 17 21 12 16 7\"></polyline><line x1=\"21\" y1=\"12\" x2=\"9\" y2=\"12\"></line></svg> ${t.signOut}`;
+        document.querySelector('.phone-input').placeholder = t.phonePlaceholder;
+        document.querySelector('.save-phone-btn').textContent = t.save;
+        document.querySelector('.cancel-phone-btn').textContent = t.cancel;
+        document.querySelector('.edit-phone-btn').title = t.editPhone;
+    });
+
+    // Phone number editing and update to backend
+    savePhoneBtn.addEventListener('click', async function() {
+        const newPhone = phoneInput.value.trim();
+        if (newPhone) {
+            try {
+                const idToken = localStorage.getItem('idToken');
+                const response = await fetch('https://fill-it.onrender.com/api/driver/update_phone', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify({ phone: newPhone }),
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    phoneNumber.textContent = data.phone;
+                    phoneEditForm.style.display = 'none';
+                    alert('Phone number updated successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || 'Failed to update phone number');
+                }
+            } catch (error) {
+                alert('Failed to update phone number');
+            }
+        }
+    });
+
+    cancelPhoneBtn.addEventListener('click', function() {
+        phoneInput.value = phoneNumber.textContent;
+        phoneEditForm.style.display = 'none';
+    });
+
+    // Close edit form when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!phoneEditForm.contains(e.target) && e.target !== editPhoneBtn) {
+            phoneEditForm.style.display = 'none';
+            phoneInput.value = phoneNumber.textContent;
+        }
+    });
+
+    // Fetch and display assigned trips for the driver
+    async function fetchDriverTrips() {
+        const idToken = localStorage.getItem('idToken');
+        if (!idToken) return;
+        const response = await fetch('https://fill-it.onrender.com/api/driver/assigned_trips', {
+            headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const data = await response.json();
+        const container = document.getElementById('tripsContainer');
+        container.innerHTML = '';
+        if (data.trips && data.trips.length > 0) {
+            data.trips.forEach(trip => {
+                const tripCard = document.createElement('div');
+                tripCard.className = 'trip-card';
+                tripCard.innerHTML = `
+                        <p><strong>From:</strong> ${trip.from_location}</p>
+                        <p><strong>To:</strong> ${trip.to_location}</p>
+                        <p><strong>Date:</strong> ${trip.date}</p>
+                        <p><strong>Customer Email:</strong> ${trip.customer_email}</p>
+                        <p><strong>Customer Phone:</strong> ${trip.customer_phone || 'N/A'}</p>
+                        <p><strong>Status:</strong> <span style="color: ${trip.status === 'trip_completed' ? '#00C853' : '#344de3'}">${trip.status}</span></p>
+                        <div class="trip-actions">
+                            ${(trip.status === 'driver_assigned') ? `
+                                <button class="complete-trip-btn" data-trip-id="${trip.trip_id}">Mark as Trip Completed</button>
+                                <button class="release-trip-btn" data-trip-id="${trip.trip_id}">Release Trip</button>
+                            ` : ''}
+                        </div>
+                    `;
+                container.appendChild(tripCard);
+            });
+        } else {
+            container.innerHTML = '<p class="no-trips">No assigned trips found</p>';
+        }
+    }
+
+    // Handle trip actions
+    const tripsContainer = document.getElementById('tripsContainer');
+    tripsContainer.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('complete-trip-btn')) {
+            const tripId = e.target.getAttribute('data-trip-id');
+            const idToken = localStorage.getItem('idToken');
+            const res = await fetch('https://fill-it.onrender.com/api/driver/complete_trip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ trip_id: tripId })
+            });
+            if (res.ok) {
+                alert('Trip marked as completed!');
+                fetchDriverTrips();
+            } else {
+                alert('Failed to mark trip as completed.');
+            }
+        }
+        if (e.target.classList.contains('release-trip-btn')) {
+            const tripId = e.target.getAttribute('data-trip-id');
+            const idToken = localStorage.getItem('idToken');
+            const res = await fetch('https://fill-it.onrender.com/api/driver/release_trip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ trip_id: tripId })
+            });
+            if (res.ok) {
+                alert('Trip released and set to pending.');
+                fetchDriverTrips();
+            } else {
+                alert('Failed to release trip.');
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', fetchDriverTrips);
+
+    // Fetch driver profile data
+    async function fetchDriverProfile() {
+        try {
+            const idToken = localStorage.getItem('idToken');
+            const response = await fetch('https://fill-it.onrender.com/api/driver/profile', {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('profileName').textContent = data.name || 'Driver';
+                document.getElementById('profileEmail').textContent = data.email || '';
+                document.getElementById('profilePhone').textContent = data.phone || '';
+                document.querySelector('.phone-input').value = data.phone || '';
+            }
+        } catch (error) {
+            console.error('Error fetching driver profile:', error);
+        }
+    }
+    fetchDriverProfile();
+
+    // Home button
+    const homeBtn = document.getElementById('homeBtn');
+    homeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'd_home.html';
+    });
+
+    // Logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    });
+</script>
+</body>
+</html>

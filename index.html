@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Export Logistics - Your trusted partner in global logistics and transportation">
+  <meta name="theme-color" content="#ffffff">
+  <title>Export Logistics</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="header">
+  <img src="logo.svg" alt="Logo" class="logo" loading="lazy">
+  <a href="login.html"><button class="signin-btn" aria-label="Sign in">Sign in</button></a>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Maximize Your Export Potential</h1>
+    <p>We set the standard in transporting goods from A to B.</p>
+
+  </div>
+  <img src="truck.png" alt="Truck Fleet" class="hero-image" loading="lazy">
+</section>
+
+<section class="card-section">
+  <div class="card">
+    <div class="card-content">
+      <div class="card-header">
+        <h2>Services We Offer</h2>
+      </div>
+      <p>Our platform offers comprehensive managed services</p>
+      <a href="#" class="learn-more">Learn More →</a>
+    </div>
+    <img src="hand.png" alt="Services Icon" class="card-img">
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-header">
+        <h2>Customer Reviews</h2>
+        <div class="rating-display">
+          <div class="stars">★★★★★</div>
+          <div class="rating-number">4.8</div>
+        </div>
+      </div>
+      <p>Based on 500+ satisfied customers worldwide. Join our growing list of happy clients.</p>
+      <a href="#" class="learn-more">View All Reviews →</a>
+    </div>
+    <img src="chat.png" alt="Review Icon" class="card-img">
+  </div>
+
+  <div class="card">
+    <div class="card-content">
+      <div class="card-header">
+        <h2>Why We?</h2>
+      </div>
+      <p>1500+ connected trusted drivers with years of trusted experience</p>
+      <a href="#" class="learn-more">Learn More →</a>
+    </div>
+    <img src="hand2.png" alt="Why Choose Us Icon" class="card-img">
+  </div>
+</section>
+
+<!-- Review Carousel Modal -->
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="close-button">&times;</button>
+    <h3>Customer Reviews</h3>
+    <div class="review-carousel-container">
+      <div class="review-carousel">
+        <!-- Review Items will be dynamically loaded or pre-defined -->
+        <div class="review-item">
+          <div class="review-header">
+            <h4>John Doe</h4>
+            <div class="stars">★★★★★</div>
+          </div>
+          <p>"Export Logistics provided exceptional service! My goods arrived on time and in perfect condition. Highly recommend their reliable and efficient transportation solutions."</p>
+        </div>
+        <div class="review-item">
+          <div class="review-header">
+            <h4>Jane Smith</h4>
+            <div class="stars">★★★★☆</div>
+          </div>
+          <p>"A very professional and supportive team. They handled all my queries promptly and ensured a smooth export process. Great experience overall!"</p>
+        </div>
+        <div class="review-item">
+          <div class="review-header">
+            <h4>David Lee</h4>
+            <div class="stars">★★★★★</div>
+          </div>
+          <p>"Outstanding logistics service! The real-time tracking was incredibly helpful, and their communication was top-notch. Truly a global leader."</p>
+        </div>
+        <div class="review-item">
+          <div class="review-header">
+            <h4>Sarah Chen</h4>
+            <div class="stars">★★★★★</div>
+          </div>
+          <p>"I've used several logistics companies, and Export Logistics stands out. Their attention to detail and commitment to customer satisfaction are unmatched. My shipments have always been flawless."</p>
+        </div>
+        <div class="review-item">
+          <div class="review-header">
+            <h4>Michael Brown</h4>
+            <div class="stars">★★★★☆</div>
+          </div>
+          <p>"Good service, though there was a slight delay on one shipment. However, their customer support was quick to resolve it. I appreciate their dedication."</p>
+        </div>
+      </div>
+      <button class="carousel-nav prev">&lt;</button>
+      <button class="carousel-nav next">&gt;</button>
+    </div>
+  </div>
+</div>
+
+<section class="contact">
+  <div class="contact-form">
+    <h2>Get in <span>Touch</span></h2>
+    <p>Fill this !!</p>
+    <form id="contactForm" novalidate>
+      <div class="form-group">
+        <input type="text" id="name" name="name" placeholder="Name *" required>
+        <span class="error-message"></span>
+      </div>
+      <div class="form-group">
+        <input type="email" id="email" name="email" placeholder="Email *" required>
+        <span class="error-message"></span>
+      </div>
+      <div class="form-group">
+        <input type="tel" id="phone" name="phone" placeholder="Phone number *" required>
+        <span class="error-message"></span>
+      </div>
+      <div class="form-group">
+        <select id="source" name="source" required>
+          <option value="">How did you find us?</option>
+          <option value="google">Google</option>
+          <option value="friend">Friend</option>
+          <option value="social">Social Media</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group" id="other-source-group" style="display:none;">
+        <input type="text" id="other-source" name="other_source" placeholder="If other, please specify">
+      </div>
+      <div class="form-group">
+        <input type="text" id="message" name="message" placeholder="Write message for us...*" required>
+        <span class="error-message"></span>
+      </div>
+      <button type="submit" class="submit-btn">SEND</button>
+    </form>
+    <div class="contact-info">
+      <div class="contact-item">
+        <strong>📞 PHONE</strong>
+        <a href="tel:8457899093">8457899093</a>
+      </div>
+
+      <div class="contact-item">
+        <strong>📧 EMAIL</strong>
+        <a href="mailto:cloudnexus@googlegroups.com">cloudnexus@googlegroups.com</a>
+      </div>
+    </div>
+  </div>
+  <div class="contact-map">
+    <img src="map.png" alt="Map Location" loading="lazy">
+  </div>
+</section>
+
+<script>
+  // Form validation
+  document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    try {
+      const response = await fetch('https://fill-it.onrender.com/api/contact', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        alert('Message sent successfully. Our team will reach out to you.');
+        this.reset();
+        document.getElementById('other-source-group').style.display = 'none';
+      } else {
+        console.error('Error details:', result.detail);
+        alert(`Failed to send message: ${result.detail || 'Please try again later.'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to send message. Please try again later.');
+    }
+  });
+
+  // Review Carousel Modal Logic
+  const reviewModal = document.getElementById('reviewModal');
+  const viewAllReviewsLink = document.querySelector('.card-section .card:nth-child(2) .learn-more');
+  const closeButton = reviewModal.querySelector('.close-button');
+  const reviewCarousel = reviewModal.querySelector('.review-carousel');
+  const prevButton = reviewModal.querySelector('.carousel-nav.prev');
+  const nextButton = reviewModal.querySelector('.carousel-nav.next');
+
+  let currentIndex = 0;
+  const reviewItems = reviewCarousel.querySelectorAll('.review-item');
+  const totalReviews = reviewItems.length;
+
+  function showReview(index) {
+    reviewItems.forEach((item, i) => {
+      item.style.display = (i === index) ? 'block' : 'none';
+    });
+  }
+
+  function nextReview() {
+    currentIndex = (currentIndex + 1) % totalReviews;
+    showReview(currentIndex);
+  }
+
+  function prevReview() {
+    currentIndex = (currentIndex - 1 + totalReviews) % totalReviews;
+    showReview(currentIndex);
+  }
+
+  viewAllReviewsLink.addEventListener('click', function(e) {
+    e.preventDefault();
+    reviewModal.classList.add('active');
+    showReview(currentIndex);
+  });
+
+  closeButton.addEventListener('click', function() {
+    reviewModal.classList.remove('active');
+  });
+
+  prevButton.addEventListener('click', prevReview);
+  nextButton.addEventListener('click', nextReview);
+
+  // Close modal when clicking outside content
+  reviewModal.addEventListener('click', function(e) {
+    if (e.target === reviewModal) {
+      reviewModal.classList.remove('active');
+    }
+  });
+
+  // Initial display
+  showReview(currentIndex);
+
+  document.getElementById('source').addEventListener('change', function() {
+    var otherGroup = document.getElementById('other-source-group');
+    if (this.value === 'other') {
+      otherGroup.style.display = 'block';
+      document.getElementById('other-source').required = true;
+    } else {
+      otherGroup.style.display = 'none';
+      document.getElementById('other-source').required = false;
+    }
+  });
+</script>
+</body>
+</html>

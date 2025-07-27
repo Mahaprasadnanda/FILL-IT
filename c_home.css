@@ -1,0 +1,908 @@
+:root {
+  --primary-color: #344de3;
+  --secondary-color: #b4092e;
+  --background: #141A1F;
+  --card-bg: #1F262E;
+  --text-color: #FFFFFF;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --transition: all 0.3s ease;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--background);
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 5%;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+  transition: var(--transition);
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.language-selector {
+  background-color: transparent;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+  position: relative;
+  padding-left: 2.5rem;
+  background-image: url("language.png");
+  background-repeat: no-repeat;
+  background-position: 0.5rem center;
+  background-size: 1.2rem;
+}
+
+.language-selector:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(71, 98, 255, 0.1);
+}
+
+.language-selector option {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.language-selector:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(71, 98, 255, 0.1);
+}
+
+.language-selector {
+  appearance: none;
+  background-image: url("language.png"), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-position: 0.5rem center, right 0.8rem center;
+  background-size: 1.2rem, 1em;
+  padding-right: 2.5rem;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color);
+  transition: var(--transition);
+  cursor: pointer;
+  object-fit: cover;
+  padding: 2px;
+  background-color: var(--card-bg);
+}
+
+.profile-icon:hover {
+  transform: scale(1.1);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 15px rgba(180, 9, 46, 0.3);
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 0;
+  margin: 0 auto;
+}
+
+.booking-card {
+  width: 100%;
+  min-width: 400px;
+  background-color: var(--card-bg);
+  padding: 2.5rem 2rem;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  transition: var(--transition);
+  align-self: center;
+  position: static;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.booking-card h2 {
+  margin: 0 0 0.7rem 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  position: relative;
+  padding-bottom: 0.75rem;
+  display: inline-block;
+  width: fit-content;
+  line-height: 1.1;
+}
+
+.booking-card h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  border-radius: 2px;
+}
+
+.booking-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.booking-card label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.autocomplete-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--background);
+  color: var(--text-color);
+  transition: var(--transition);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.autocomplete-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(71, 98, 255, 0.1);
+}
+
+.autocomplete-input::placeholder {
+  color: #aaa;
+  opacity: 1;
+  font-size: 1rem;
+}
+
+.booking-card input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  transition: var(--transition);
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.booking-card input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(71, 98, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.booking-card button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.booking-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(71, 98, 255, 0.3);
+}
+
+.profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-popup {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: -10px;
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  width: 280px;
+  padding: 0;
+  display: none;
+  z-index: 1000;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.profile-popup.active {
+  display: block;
+  animation: slideDown 0.2s ease-out;
+}
+
+.profile-popup::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--card-bg);
+  transform: rotate(45deg);
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  z-index: 1;
+}
+
+.profile-header {
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(to bottom, rgba(52, 77, 227, 0.1), transparent);
+}
+
+.profile-header-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  padding: 3px;
+  background-color: var(--card-bg);
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+.profile-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.profile-email {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-info {
+  padding: 1rem 1.5rem;
+}
+
+.profile-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.profile-info-item svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  color: var(--primary-color);
+}
+
+.edit-phone-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition);
+  color: var(--text-color);
+  border-radius: 4px;
+}
+
+.edit-phone-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.profile-info-item:hover .edit-phone-btn {
+  opacity: 0.7;
+}
+
+.edit-phone-btn:hover {
+  opacity: 1 !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+}
+
+.phone-edit-form {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.phone-input {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.phone-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 77, 227, 0.2);
+}
+
+.phone-edit-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.phone-edit-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.save-phone-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.save-phone-btn:hover {
+  background-color: #2a3db5;
+}
+
+.cancel-phone-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+}
+
+.cancel-phone-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.profile-option {
+  padding: 0.9rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: var(--transition);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.profile-option:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--primary-color);
+}
+
+.profile-option.sign-out {
+  color: #ff4d4d;
+}
+
+.profile-option.sign-out:hover {
+  background-color: rgba(255, 77, 77, 0.1);
+  color: #ff4d4d;
+}
+
+.profile-option svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.9;
+  transition: var(--transition);
+}
+
+.profile-option:hover svg {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.profile-option.sign-out:hover svg {
+  color: #ff4d4d;
+}
+
+.profile-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0;
+  opacity: 0.5;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .booking-card {
+    padding: 1.2rem 0.7rem;
+    border-radius: 16px;
+  }
+  .booking-card h2 {
+    font-size: 1.3rem;
+  }
+  .autocomplete-input {
+    height: 38px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 1rem;
+  }
+
+  .language-selector {
+    min-width: 100px;
+    padding-left: 2rem;
+  }
+
+  .booking-card {
+    padding: 1.5rem;
+  }
+
+  .booking-card h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-right {
+    gap: 1rem;
+  }
+
+  .language-selector {
+    min-width: 80px;
+    padding: 0.5rem 0.5rem 0.5rem 1.8rem;
+    font-size: 0.8rem;
+  }
+
+  .profile-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .booking-card {
+    padding: 1rem;
+  }
+
+  .profile-popup {
+    width: 260px;
+    right: 0;
+  }
+}
+
+/* Remove location-section and map styles */
+.location-section, #map {
+  display: none !important;
+}
+
+/* Google Places Autocomplete Dropdown Custom Theme */
+.pac-container {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+  border: 1px solid var(--border-color) !important;
+  font-family: 'Inter', sans-serif !important;
+  z-index: 9999 !important;
+}
+.pac-item {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  border-radius: 6px !important;
+  padding: 0.7em 1em !important;
+  font-size: 1rem !important;
+  transition: background 0.2s;
+}
+.pac-item:hover, .pac-item-selected {
+  background: rgba(52, 77, 227, 0.15) !important;
+  color: var(--primary-color) !important;
+}
+.pac-icon {
+  filter: invert(1) brightness(0.7);
+}
+.pac-item-query {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+.pac-matched {
+  color: var(--secondary-color) !important;
+}
+.pac-logo:after {
+  background: none !important;
+}
+
+/* Enhanced responsive styles */
+@media screen and (max-width: 1200px) {
+  .booking-card {
+    width: 90%;
+    max-width: 800px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  header {
+    padding: 1.2rem 4%;
+  }
+
+  .logo-img {
+    height: 35px;
+  }
+
+  .booking-card {
+    width: 95%;
+    max-width: 700px;
+    padding: 2rem 1.5rem;
+  }
+
+  .booking-card h2 {
+    font-size: 1.9rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  header {
+    padding: 1rem 3%;
+  }
+
+  .logo-img {
+    height: 32px;
+  }
+
+  .header-right {
+    gap: 1rem;
+  }
+
+  .language-selector {
+    min-width: 100px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    padding-left: 2.2rem;
+    background-size: 1rem;
+  }
+
+  .profile-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .booking-card {
+    width: 95%;
+    min-width: unset;
+    padding: 1.8rem 1.2rem;
+    gap: 1.5rem;
+  }
+
+  .booking-card h2 {
+    font-size: 1.7rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .booking-card label {
+    font-size: 0.95rem;
+  }
+
+  .autocomplete-input {
+    height: 42px;
+    font-size: 0.95rem;
+  }
+
+  .booking-card input {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .booking-card button {
+    padding: 0.7rem 1.3rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  header {
+    padding: 0.8rem 3%;
+  }
+  .logo-img {
+    height: 28px;
+  }
+  .header-right {
+    gap: 0.8rem;
+  }
+  .language-selector {
+    min-width: 90px;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    padding-left: 2rem;
+    background-size: 0.9rem;
+  }
+  .profile-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .booking-card {
+    width: 99%;
+    min-width: 320px;
+    max-width: 480px;
+    padding: 1.5rem 1rem;
+    gap: 1.2rem;
+    border-radius: 16px;
+    margin: 0 auto;
+  }
+  .booking-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+  }
+  .booking-card label {
+    font-size: 0.9rem;
+  }
+  .autocomplete-input {
+    height: 40px;
+    font-size: 0.9rem;
+    padding: 0 12px;
+  }
+  .booking-card input {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  .booking-card button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  .profile-popup {
+    width: 280px;
+    right: -10px;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  header {
+    padding: 0.7rem 2%;
+  }
+  .logo-img {
+    height: 25px;
+  }
+  .header-right {
+    gap: 0.6rem;
+  }
+  .language-selector {
+    min-width: 80px;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    padding-left: 1.8rem;
+    background-size: 0.8rem;
+  }
+  .profile-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .booking-card {
+    width: 99%;
+    min-width: 280px;
+    max-width: 400px;
+    padding: 1.2rem 0.5rem;
+    gap: 1rem;
+    margin: 0 auto;
+  }
+  .booking-card h2 {
+    font-size: 1.3rem;
+  }
+  .booking-card label {
+    font-size: 0.85rem;
+  }
+  .autocomplete-input {
+    height: 38px;
+    font-size: 0.85rem;
+  }
+  .booking-card input {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  .booking-card button {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .logo-img:hover,
+  .profile-icon:hover,
+  .language-selector:hover,
+  .booking-card button:hover,
+  .profile-option:hover,
+  .edit-phone-btn:hover {
+    transform: none;
+  }
+
+  .logo-img:active,
+  .profile-icon:active,
+  .language-selector:active,
+  .booking-card button:active,
+  .profile-option:active,
+  .edit-phone-btn:active {
+    opacity: 0.8;
+  }
+}
+
+/* Improve tap target sizes for mobile */
+button,
+a,
+input[type="submit"],
+.language-selector,
+.profile-icon {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Add smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+/* Improve form accessibility */
+.autocomplete-input:focus-visible,
+.booking-card input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Add loading state styles */
+.booking-card button.loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+/* Improve error state visibility */
+.autocomplete-input.error,
+.booking-card input.error {
+  border-color: var(--secondary-color);
+}
+
+.error-message {
+  color: var(--secondary-color);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  text-align: left;
+  width: 100%;
+}
+
+/* Add transition for smoother animations */
+.booking-card,
+.autocomplete-input,
+.booking-card input,
+.booking-card button,
+.profile-icon,
+.language-selector {
+  transition: var(--transition);
+}
+
+/* Improve location autocomplete styles */
+.pac-container {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.pac-item {
+  padding: 0.8rem 1rem;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background-color: rgba(71, 98, 255, 0.1);
+}
+
+.pac-icon {
+  margin-right: 0.8rem;
+}
+
+.pac-item-query {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.pac-matched {
+  color: var(--primary-color);
+}
