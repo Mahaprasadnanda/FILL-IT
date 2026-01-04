@@ -15,8 +15,7 @@ from firebase_admin import db as rtdb
 
 router = APIRouter()
 
-RTDB_URL = 'https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/'
-GOOGLE_MAPS_API_KEY = 'AIzaSyAOXzRX48gcKoX4ndad2hcSPQ7hxFfdSJs'
+
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -257,3 +256,4 @@ async def release_trip(request: Request, authorization: Optional[str] = Header(N
         'status': 'pending'
     })
     return {'message': 'Trip released and set to pending.'}
+
