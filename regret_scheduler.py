@@ -4,47 +4,58 @@ from datetime import datetime
 import pytz
 import os
 
-RTDB_URL = os.getenv("RTDB_URL", "https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/")
+RTDB_URL = os.getenv("RTDB_URL")
 
 def update_pending_to_regret():
+    if not RTDB_URL:
+        return
+        
     try:
         ist = pytz.timezone('Asia/Kolkata')
         today = datetime.now(ist).date()
         trips_ref = db.reference('/trips', url=RTDB_URL)
-        all_trips = trips_ref.get()
-        if not all_trips:
+        pending_trips = trips_ref.order_by_child('status/status').equal_to('pending').get()
+        if not pending_trips:
             return
         
-        # Handle case where trips is a list instead of dict
-        if isinstance(all_trips, list):
-            all_trips = {str(i): trip for i, trip in enumerate(all_trips) if trip}
+        if isinstance(pending_trips, list):
+            pending_trips = {str(i): trip for i, trip in enumerate(pending_trips) if trip}
 
-        for trip_id, trip in all_trips.items():
+        for trip_id, trip in pending_trips.items():
             if not isinstance(trip, dict):
                 continue
 
             try:
-                status = trip.get('status', {}).get('status')
                 booking_date = trip.get('date')
-                if status == 'pending' and booking_date:
+                if booking_date:
                     try:
                         if '-' in str(booking_date):
                             booking_date_obj = datetime.strptime(str(booking_date), "%Y-%m-%d").date()
                         else:
                             booking_date_obj = datetime.strptime(str(booking_date), "%d/%m/%Y").date()
                     except ValueError:
-                        continue # Skip invalid dates silently to avoid breaking the job
+                        continue 
                     
                     if booking_date_obj < today:
-                        trips_ref.child(trip_id).child('status').update({
-                            'status': 'regret',
-                            'updated_at': datetime.now(ist).isoformat()
-                        })
-            except Exception as e:
-                print(f"Error updating trip {trip_id}: {e}")
-    except Exception as outer_e:
-        print(f"Scheduler outer error: {outer_e}")
+                        # Update status using transaction to ensure it's still pending
+                        def regret_txn(current_status):
+                            if current_status is None:
+                                return current_status
+                            if current_status.get('status') == 'pending':
+                                current_status['status'] = 'regret'
+                                current_status['updated_at'] = datetime.now(ist).isoformat()
+                                return current_status
+                            return None
+                        
+                        try:
+                            trips_ref.child(f"{trip_id}/status").transaction(regret_txn)
+                        except db.TransactionAbortedError:
+                            pass # Probably no longer pending
+            except Exception:
+                pass # Silently skip one failed trip
+    except Exception:
+        pass # Silently skip job failure
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(update_pending_to_regret, 'interval', hours=1)  
+scheduler.add_job(update_pending_to_regret, 'interval', hours=1, coalesce=True, max_instances=1)  
 scheduler.start() 

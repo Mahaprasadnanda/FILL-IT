@@ -98,8 +98,14 @@ async def refresh_token(request: RefreshTokenRequest):
     }
 
 @router.get("/get-role")
-def get_role(email: str = Query(..., description="User email to fetch role")):
+def get_role(
+    email: str = Query(..., description="User email to fetch role"),
+    current_user: dict = Depends(get_current_user)
+):
     email = email.lower()
+    if current_user.get("email", "").lower() != email:
+        raise HTTPException(status_code=403, detail="Unauthorized email")
+        
     if db.collection("Customer").document(email).get().exists:
         return {"role": "customer"}
     elif db.collection("Driver").document(email).get().exists:
@@ -140,11 +146,16 @@ async def update_profile(
     return {"message": "Profile updated successfully"}
 
 @router.post("/logout")
-async def logout(request: LogoutRequest):
+async def logout(
+    request_body: LogoutRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user)
+):
     try:
-        decoded_token = auth.verify_id_token(request.id_token)
-        uid = decoded_token.get("uid")
+        uid = current_user.get("uid")
         auth.revoke_refresh_tokens(uid)
+        request.session.clear()
         return {"message": "Successfully logged out"}
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Logout failed: {str(e)}")
+        print(f"Logout failed for UID {uid}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Logout failed.")

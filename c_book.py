@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
 import os
 import httpx
 from firebase_admin import db
@@ -10,7 +10,7 @@ from dependencies import require_customer
 router = APIRouter()
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-RTDB_URL = os.getenv("RTDB_URL", "https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/")
+RTDB_URL = os.getenv("RTDB_URL")
 
 class TripBookingRequest(BaseModel):
     email: EmailStr
@@ -18,27 +18,37 @@ class TripBookingRequest(BaseModel):
     to_location: str
     date: str  
 
+    @field_validator('date')
+    def validate_date(cls, v):
+        try:
+            datetime.strptime(v, "%Y-%m-%d")
+            return v
+        except ValueError:
+            raise ValueError("Date must be in YYYY-MM-DD format")
+
 @router.post('/book-trip')
 async def book_trip(request: TripBookingRequest, current_user: dict = Depends(require_customer)):
     user_email = current_user.get("email", "").lower()
     if request.email.lower() != user_email:
         raise HTTPException(status_code=403, detail="Cannot book trip for another user.")
 
+    if not GOOGLE_MAPS_API_KEY:
+        raise HTTPException(status_code=500, detail="Google Maps API key not configured.")
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured.")
+
     try:
         from_lat, from_lon = None, None
-        if GOOGLE_MAPS_API_KEY:
-            geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={request.from_location}&key={GOOGLE_MAPS_API_KEY}'
-            async with httpx.AsyncClient() as client:
-                geo_res = await client.get(geo_url)
-            geo_data = geo_res.json()
-            if geo_data.get('results') and geo_data['results'][0]:
-                from_lat = geo_data['results'][0]['geometry']['location']['lat']
-                from_lon = geo_data['results'][0]['geometry']['location']['lng']
-            else:
-                raise HTTPException(status_code=400, detail="Could not geocode the pickup location.")
+        geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={request.from_location}&key={GOOGLE_MAPS_API_KEY}'
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            geo_res = await client.get(geo_url)
+        geo_data = geo_res.json()
+        if geo_data.get('results') and geo_data['results'][0]:
+            from_lat = geo_data['results'][0]['geometry']['location']['lat']
+            from_lon = geo_data['results'][0]['geometry']['location']['lng']
         else:
-            raise HTTPException(status_code=500, detail="Google Maps API key not configured.")
-
+            raise HTTPException(status_code=400, detail="Could not geocode the pickup location.")
+            
         ist = pytz.timezone('Asia/Kolkata')
         customer_phone = current_user.get('customer_data', {}).get('phone', '')
 
@@ -66,5 +76,5 @@ async def book_trip(request: TripBookingRequest, current_user: dict = Depends(re
     except HTTPException:
         raise
     except Exception as e:
-        print('Error in /book-trip:', str(e))
+        print(f"Error in /book-trip: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to book trip due to an internal error.") 

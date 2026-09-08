@@ -72,9 +72,16 @@ The backend implements a clear separation of concerns using FastAPI:
 - `regret_scheduler.py`: Scheduled job to move expired pending trips to a `regret` state.
 - `main.py`: Central FastAPI app with global exception handling and CORS.
 
+### Trip Lifecycle
+Trips follow a strict state machine:
+- `pending` → `driver_assigned` (when a driver accepts)
+- `driver_assigned` → `trip_completed` (when the driver finishes)
+- `pending` → `regret` (when scheduled job expires a trip in the past)
+- `driver_assigned` → `pending` (when a driver releases a trip)
+
 ### Concurrency and Geolocation
-- **Geolocation optimization**: Geocoding is performed exactly once upon trip creation, storing `from_lat` and `from_lon`. Driver search performs local Haversine distance calculations without repeating external API calls.
-- **Race Condition Prevention**: RTDB Transactions are used when drivers accept trips to ensure exactly one driver can claim a given trip at a time.
+- **Geolocation optimization**: Geocoding is performed exactly once upon trip creation, storing `from_lat` and `from_lon`. Driver search performs local Haversine distance calculations without repeating external API calls. Editing a trip geocodes only if the pickup location changes.
+- **Race Condition Prevention**: RTDB Transactions are used when drivers accept, complete, or release trips to ensure exactly one driver can claim or modify a given trip state at a time.
 
 ## 🚀 Getting Started
 

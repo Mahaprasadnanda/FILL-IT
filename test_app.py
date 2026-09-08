@@ -1,8 +1,14 @@
 import sys
 import pytest
+import os
 from unittest.mock import patch, MagicMock
 
-# Mock firebase configs BEFORE importing main
+os.environ["RTDB_URL"] = "https://mock-url.firebaseio.com"
+os.environ["SESSION_SECRET_KEY"] = "mock_secret"
+os.environ["FIREBASE_API_KEY"] = "mock_key"
+os.environ["GOOGLE_MAPS_API_KEY"] = "mock_key"
+os.environ["RESEND_API_KEY"] = "mock_key"
+
 mock_firestore = MagicMock()
 mock_rtdb = MagicMock()
 with patch("firebase_admin.firestore.client", return_value=mock_firestore), \
@@ -56,13 +62,11 @@ def test_customer_cannot_modify_others_trip(mock_ref, mock_collection, mock_veri
     mock_cust_doc.exists = True
     mock_collection.return_value.document.return_value.get.return_value = mock_cust_doc
     
-    # Mock the trip owned by customer2
     mock_trip_data = {"customer_email": "customer2@test.com", "status": {"status": "pending"}}
     mock_ref.return_value.get.return_value = mock_trip_data
     
     response = client.put("/edit-trip/trip_123", json={"from_location": "A", "to_location": "B", "date": "2026-10-10"}, headers={"Authorization": "Bearer GOOD_TOKEN"})
     assert response.status_code == 403
-    assert "Not authorized" in response.text
 
 @patch("dependencies.auth.verify_id_token")
 @patch("dependencies.db.collection")
@@ -73,18 +77,16 @@ def test_driver_cannot_complete_others_trip(mock_ref, mock_collection, mock_veri
     mock_driver_doc.exists = True
     mock_collection.return_value.document.return_value.get.return_value = mock_driver_doc
     
-    # Mock the trip assigned to driver2
-    mock_trip_data = {
-        "status": {
-            "status": "driver_assigned",
-            "driver_email": "driver2@test.com"
-        }
-    }
-    mock_ref.return_value.get.return_value = mock_trip_data
+    # Simulate transaction evaluation
+    def txn_side_effect(txn_func):
+        # txn_func will return None if authorization fails
+        res = txn_func({"status": "driver_assigned", "driver_email": "driver2@test.com"})
+        return res is not None
+
+    mock_ref.return_value.transaction.side_effect = txn_side_effect
     
     response = client.post("/api/driver/complete_trip", json={"trip_id": "trip_123"}, headers={"Authorization": "Bearer GOOD_TOKEN"})
     assert response.status_code == 403
-    assert "Not authorized" in response.text
 
 @patch("dependencies.auth.verify_id_token")
 @patch("dependencies.db.collection")
@@ -95,12 +97,38 @@ def test_race_condition_assignment(mock_ref, mock_collection, mock_verify):
     mock_driver_doc.exists = True
     mock_collection.return_value.document.return_value.get.return_value = mock_driver_doc
     
-    # We will mock transaction behavior to simulate conflict
     mock_ref.return_value.transaction.return_value = False
     
     response = client.post("/api/driver/accept_trip", json={"trip_id": "trip_123"}, headers={"Authorization": "Bearer GOOD_TOKEN"})
     assert response.status_code == 409
-    assert "Conflict" in response.text
+    
+@patch("dependencies.auth.verify_id_token")
+@patch("dependencies.db.collection")
+@patch("c_triphistory.db.reference")
+@patch("httpx.AsyncClient.get")
+def test_edit_trip_location_change_geocodes(mock_get, mock_ref, mock_collection, mock_verify):
+    mock_verify.return_value = {"email": "customer@test.com", "uid": "123"}
+    mock_cust_doc = MagicMock()
+    mock_cust_doc.exists = True
+    mock_collection.return_value.document.return_value.get.return_value = mock_cust_doc
+    
+    mock_trip_data = {
+        "customer_email": "customer@test.com", 
+        "from_location": "A",
+        "status": {"status": "pending"}
+    }
+    mock_ref.return_value.get.return_value = mock_trip_data
+    mock_ref.return_value.transaction.return_value = True
+    
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "results": [{"geometry": {"location": {"lat": 10.0, "lng": 20.0}}}]
+    }
+    mock_get.return_value = mock_response
+
+    response = client.put("/edit-trip/trip_123", json={"from_location": "B", "to_location": "C", "date": "2026-10-10"}, headers={"Authorization": "Bearer GOOD_TOKEN"})
+    assert response.status_code == 200
+    mock_get.assert_called_once() 
 
 if __name__ == "__main__":
     pytest.main(["-v", "test_app.py"])

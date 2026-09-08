@@ -11,8 +11,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     try:
         decoded_token = auth.verify_id_token(token)
         return decoded_token
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=f'Invalid authentication credentials: {str(e)}')
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 def require_customer(user: dict = Depends(get_current_user)):
     email = user.get('email', '').lower()
