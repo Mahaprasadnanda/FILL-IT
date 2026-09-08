@@ -3,9 +3,9 @@ from pydantic import BaseModel
 import os
 import httpx
 from firebase_config import db
-from datetime import datetime
+from datetime import datetime, timezone
 from firebase_admin import auth
-from typing import Optional
+from typing import Optional, Literal
 from dotenv import load_dotenv
 from dependencies import get_current_user
 
@@ -20,7 +20,7 @@ class SignupRequest(BaseModel):
     email: str
     phone: str
     password: str
-    role: str
+    role: Literal["customer", "driver"]
     vehicle_number: Optional[str] = None
     vehicle_chassis: Optional[str] = None
 
@@ -43,28 +43,31 @@ async def signup(user: SignupRequest):
         "returnSecureToken": True
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         res = await client.post(signup_url, json=payload)
+        
     if res.status_code != 200:
-        raise HTTPException(status_code=res.status_code, detail=res.json())
+        error_msg = res.json().get('error', {}).get('message', 'Signup failed.')
+        raise HTTPException(status_code=400, detail=error_msg)
 
     id_token = res.json()["idToken"]
 
     verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         verify_res = await client.post(verify_url, json={"requestType": "VERIFY_EMAIL", "idToken": id_token})
+        
     if verify_res.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to send verification email")
+        raise HTTPException(status_code=500, detail="Failed to send verification email.")
 
-    collection = "Customer" if user.role.lower() == "customer" else "Driver"
+    collection = "Customer" if user.role == "customer" else "Driver"
     data = {
         "name": user.name,
         "email": email,
         "phone": user.phone,
-        "role": user.role.lower(),
-        "created_at": datetime.utcnow().isoformat()
+        "role": user.role,
+        "created_at": datetime.now(timezone.utc).isoformat()
     }
-    if user.role.lower() == "driver":
+    if user.role == "driver":
         if user.vehicle_number is not None:
             data["vehicle_number"] = user.vehicle_number
         if user.vehicle_chassis is not None:
@@ -86,7 +89,8 @@ async def verify_phone_token(request: Request):
         uid = decoded_token.get("uid")
         return {"message": "Phone number verified", "uid": uid, "phone_number": phone_number}
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        print(f"Verify phone failed: {str(e)}")
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/update-phone")
 async def update_phone(user: UpdatePhoneRequest, current_user: dict = Depends(get_current_user)):
@@ -99,4 +103,5 @@ async def update_phone(user: UpdatePhoneRequest, current_user: dict = Depends(ge
         })
         return {"message": "Phone number updated successfully"}
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Failed to update phone: {str(e)}")
+        print(f"Update phone failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update phone.")

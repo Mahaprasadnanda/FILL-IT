@@ -1,31 +1,36 @@
 from fastapi import FastAPI, Form, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from login import router as login_router
 from signup import router as signup_router
 from c_book import router as book_router
 from c_triphistory import router as trip_history_router
 from d_book import router as driver_router
 from regret_scheduler import scheduler
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
 import httpx
 import os
 
-app = FastAPI()
+SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY')
+if not SESSION_SECRET_KEY:
+    raise RuntimeError("SESSION_SECRET_KEY environment variable is required")
 
-SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY', 'default-insecure-secret-key')
+app = FastAPI()
 
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET_KEY,  
-    session_cookie="session"
+    session_cookie="session",
+    https_only=True,
+    same_site="lax"
 )
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://fillitcloudnexus.web.app"],
+    allow_origins=["https://fillitcloudnexus.web.app", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -41,6 +46,13 @@ app.include_router(driver_router)
 
 RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 RESEND_API_URL = 'https://api.resend.com/emails'
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail}
+    )
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -59,8 +71,11 @@ async def contact(
     other_source: str = Form(None),
     message: str = Form(...)
 ):
+    if not RESEND_API_KEY:
+        raise HTTPException(status_code=500, detail="Resend API key not configured.")
+        
     try:
-        body = f"""Name: {name}\nEmail: {email}\nPhone: {phone}\nSource: {source}\nOther Source: {other_source or ''}\nMessage: {message}"""
+        body = f"Name: {name}\nEmail: {email}\nPhone: {phone}\nSource: {source}\nOther Source: {other_source or ''}\nMessage: {message}"
         data = {
             'from': 'FILLit <onboarding@resend.dev>',
             'to': 'mail2mahaprasad45@gmail.com',
@@ -72,7 +87,7 @@ async def contact(
             'Content-Type': 'application/json'
         }
         
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(RESEND_API_URL, json=data, headers=headers)
         
         if response.status_code == 200:

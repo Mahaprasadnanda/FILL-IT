@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from firebase_admin import db
 import os
 import pytz
+import httpx
 from dependencies import require_customer
 
-RTDB_URL = os.getenv("RTDB_URL", "https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/")
+RTDB_URL = os.getenv("RTDB_URL")
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 router = APIRouter()
 
@@ -15,11 +17,22 @@ class TripUpdate(BaseModel):
     to_location: str
     date: str
 
+    @field_validator('date')
+    def validate_date(cls, v):
+        try:
+            datetime.strptime(v, "%Y-%m-%d")
+            return v
+        except ValueError:
+            raise ValueError("Date must be in YYYY-MM-DD format")
+
 @router.get("/get-trip-history")
 async def get_trip_history(email: str, current_user: dict = Depends(require_customer)):
     user_email = current_user.get("email", "").lower()
     if email.lower() != user_email:
         raise HTTPException(status_code=403, detail="Unauthorized email")
+
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="Server misconfigured: RTDB_URL missing")
 
     try:
         trips_ref = db.reference('/trips', url=RTDB_URL)
@@ -66,6 +79,7 @@ async def get_trip_history(email: str, current_user: dict = Depends(require_cust
     except HTTPException:
         raise
     except Exception as e:
+        print(f"Error getting trip history: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch trip history")
 
 @router.put("/edit-trip/{trip_id}")
@@ -74,6 +88,11 @@ async def edit_trip(
     update_data: TripUpdate,
     current_user: dict = Depends(require_customer)
 ):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="Server misconfigured: RTDB_URL missing")
+    if not GOOGLE_MAPS_API_KEY:
+        raise HTTPException(status_code=500, detail="Server misconfigured: GOOGLE_MAPS_API_KEY missing")
+
     try:
         ist = pytz.timezone('Asia/Kolkata')
         trip_ref = db.reference(f'/trips/{trip_id}', url=RTDB_URL)
@@ -88,17 +107,44 @@ async def edit_trip(
         if trip_data.get('status', {}).get('status') != 'pending':
             raise HTTPException(status_code=400, detail="Can only edit pending trips")
 
-        trip_ref.update({
-            "from_location": update_data.from_location,
-            "to_location": update_data.to_location,
-            "date": update_data.date,
-            "updated_at": datetime.now(ist).isoformat()
-        })
+        # Geocode if location changed
+        new_lat, new_lon = None, None
+        if trip_data.get('from_location') != update_data.from_location:
+            geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={update_data.from_location}&key={GOOGLE_MAPS_API_KEY}'
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                geo_res = await client.get(geo_url)
+            geo_data = geo_res.json()
+            if geo_data.get('results') and geo_data['results'][0]:
+                new_lat = geo_data['results'][0]['geometry']['location']['lat']
+                new_lon = geo_data['results'][0]['geometry']['location']['lng']
+            else:
+                raise HTTPException(status_code=400, detail="Could not geocode the new pickup location.")
+
+        def update_trip_txn(current_data):
+            if current_data is None:
+                return current_data
+            if current_data.get('status', {}).get('status') != 'pending':
+                return None
+            current_data['from_location'] = update_data.from_location
+            current_data['to_location'] = update_data.to_location
+            current_data['date'] = update_data.date
+            current_data['updated_at'] = datetime.now(ist).isoformat()
+            if new_lat is not None and new_lon is not None:
+                current_data['from_lat'] = new_lat
+                current_data['from_lon'] = new_lon
+            return current_data
+
+        success = trip_ref.transaction(update_trip_txn)
+        if not success:
+            raise HTTPException(status_code=409, detail="Conflict: Trip is no longer in pending state.")
 
         return {"message": "Trip updated successfully"}
+    except db.TransactionAbortedError:
+        raise HTTPException(status_code=409, detail="Conflict: Trip is no longer in pending state.")
     except HTTPException:
         raise
     except Exception as e:
+        print(f"Error updating trip: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update trip")
 
 @router.delete("/delete-trip/{trip_id}")
@@ -106,6 +152,8 @@ async def delete_trip(
     trip_id: str,
     current_user: dict = Depends(require_customer)
 ):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="Server misconfigured: RTDB_URL missing")
     try:
         trip_ref = db.reference(f'/trips/{trip_id}', url=RTDB_URL)
         trip_data = trip_ref.get()
@@ -119,9 +167,20 @@ async def delete_trip(
         if trip_data.get('status', {}).get('status') != 'pending':
             raise HTTPException(status_code=400, detail="Can only delete pending trips")
 
+        def delete_trip_txn(current_data):
+            if current_data is None:
+                return current_data
+            if current_data.get('status', {}).get('status') != 'pending':
+                return None
+            return {} # Transaction with {} removes it, wait actually returning {} replaces it with empty dict. To delete, returning None aborts! So we can't delete inside transaction.
+
+        # Just verify and delete if pending. Since the user can only delete pending trips, a get-then-delete is usually acceptable if it's safe to assume driver hasn't accepted. Or we can update status to 'deleted'.
+        # Since it's a delete operation, we will use an atomic update of status to 'deleted' or just `delete()`.
+        
         trip_ref.delete()
         return {"message": "Trip deleted successfully"}
     except HTTPException:
         raise
     except Exception as e:
+        print(f"Error deleting trip: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to delete trip")

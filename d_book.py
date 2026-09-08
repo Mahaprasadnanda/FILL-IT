@@ -1,16 +1,27 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
+from pydantic import BaseModel
 import httpx
-from datetime import datetime
+from datetime import datetime, timezone
 import math
 from firebase_admin import db as rtdb
 import os
+import pytz
 from dependencies import require_driver
 
 router = APIRouter()
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-RTDB_URL = os.getenv("RTDB_URL", "https://fill-it-19a6e-default-rtdb.asia-southeast1.firebasedatabase.app/")
+RTDB_URL = os.getenv("RTDB_URL")
+
+class TripActionRequest(BaseModel):
+    trip_id: str
+
+class SearchTripsRequest(BaseModel):
+    from_location: str
+
+class UpdatePhoneRequest(BaseModel):
+    phone: str
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371  # Earth radius in km
@@ -39,17 +50,12 @@ async def get_driver_profile(current_user: dict = Depends(require_driver)):
     }
 
 @router.post("/api/driver/update_phone")
-async def update_phone(request: Request, current_user: dict = Depends(require_driver)):
-    data = await request.json()
-    new_phone = data.get("phone")
-    if not new_phone:
-        raise HTTPException(status_code=400, detail="Phone number is required")
-    
+async def update_phone(request: UpdatePhoneRequest, current_user: dict = Depends(require_driver)):
     email = current_user.get("email", "").lower()
     from firebase_config import db
     driver_ref = db.collection('Driver').document(email)
-    driver_ref.update({"phone": new_phone})
-    return {"phone": new_phone}
+    driver_ref.update({"phone": request.phone})
+    return {"phone": request.phone}
 
 @router.get("/logout")
 async def logout(request: Request):
@@ -65,11 +71,16 @@ async def search_trips(request: Request, current_user: dict = Depends(require_dr
     
     if not GOOGLE_MAPS_API_KEY:
         raise HTTPException(status_code=500, detail="Google Maps API Key not configured")
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured")
 
     geo_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={driver_from}&key={GOOGLE_MAPS_API_KEY}'
-    async with httpx.AsyncClient() as client:
-        geo_res = await client.get(geo_url)
-    geo_data = geo_res.json()
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            geo_res = await client.get(geo_url)
+        geo_data = geo_res.json()
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to connect to Geocoding API.")
     
     if not geo_data.get('results') or not geo_data['results'][0]:
         raise HTTPException(status_code=400, detail="Could not geocode driver location")
@@ -78,23 +89,21 @@ async def search_trips(request: Request, current_user: dict = Depends(require_dr
     driver_lon = geo_data['results'][0]['geometry']['location']['lng']
     
     trips_ref = rtdb.reference('/trips', url=RTDB_URL)
-    trips = trips_ref.get() or {}
+    trips = trips_ref.order_by_child('status/status').equal_to('pending').get()
+    
+    if not trips:
+        return {'trips': []}
+
+    results = []
     if isinstance(trips, list):
         trips = {str(i): trip for i, trip in enumerate(trips) if trip}
-        
-    results = []
+
     for trip_id, trip in trips.items():
         if not isinstance(trip, dict):
             continue
         
-        status_info = trip.get('status', {})
-        trip_status = status_info.get('status', 'pending')
-        if trip_status != 'pending':
-            continue
-        
         cust_lat = trip.get('from_lat')
         cust_lon = trip.get('from_lon')
-        
         if cust_lat is None or cust_lon is None:
             continue
             
@@ -108,22 +117,21 @@ async def search_trips(request: Request, current_user: dict = Depends(require_dr
                 'date': trip.get('date', ''),
                 'created_at': trip.get('created_at', ''),
                 'customer_phone': trip.get('customer_phone', ''),
-                'status': trip_status,
+                'status': 'pending',
                 'distance_km': round(dist, 2)
             })
     return {'trips': results}
 
 @router.post("/api/driver/accept_trip")
-async def accept_trip(request: Request, current_user: dict = Depends(require_driver)):
-    data = await request.json()
-    trip_id = data.get('trip_id')
-    if not trip_id:
-        raise HTTPException(status_code=400, detail="Missing trip_id")
-        
+async def accept_trip(req: TripActionRequest, current_user: dict = Depends(require_driver)):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured")
+
     driver_email = current_user.get('email', '').lower()
     driver_data = current_user.get('driver_data', {})
+    ist = pytz.timezone('Asia/Kolkata')
     
-    trip_ref = rtdb.reference(f'/trips/{trip_id}/status', url=RTDB_URL)
+    trip_ref = rtdb.reference(f'/trips/{req.trip_id}/status', url=RTDB_URL)
 
     def assign_driver_transaction(current_status):
         if current_status is None:
@@ -134,7 +142,7 @@ async def accept_trip(request: Request, current_user: dict = Depends(require_dri
             current_status['driver_name'] = driver_data.get('name', '')
             current_status['driver_phone'] = driver_data.get('phone', '')
             current_status['vehicle_number'] = driver_data.get('vehicle_number', '')
-            current_status['assigned_at'] = datetime.now().isoformat()
+            current_status['assigned_at'] = datetime.now(ist).isoformat()
             return current_status
         return None  # Aborts transaction
 
@@ -148,60 +156,110 @@ async def accept_trip(request: Request, current_user: dict = Depends(require_dri
         raise HTTPException(status_code=409, detail="Conflict: Trip is no longer available.")
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Transaction failed: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Transaction failed due to an internal error.")
 
 @router.post("/api/driver/complete_trip")
-async def complete_trip(request: Request, current_user: dict = Depends(require_driver)):
-    data = await request.json()
-    trip_id = data.get('trip_id')
-    if not trip_id:
-        raise HTTPException(status_code=400, detail="Missing trip_id")
-        
+async def complete_trip(req: TripActionRequest, current_user: dict = Depends(require_driver)):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured")
+
     driver_email = current_user.get('email', '').lower()
-    
-    trip_ref = rtdb.reference(f'/trips/{trip_id}', url=RTDB_URL)
-    trip_data = trip_ref.get()
-    
-    if not trip_data:
-        raise HTTPException(status_code=404, detail="Trip not found")
-        
-    status_info = trip_data.get('status', {})
-    if status_info.get('driver_email', '').lower() != driver_email:
-        raise HTTPException(status_code=403, detail="Not authorized to complete this trip")
-        
-    if status_info.get('status') != 'driver_assigned':
-        raise HTTPException(status_code=400, detail="Trip is not in driver_assigned state")
-        
-    trip_ref.child('status').update({
-        'status': 'trip_completed',
-        'completed_at': datetime.now().isoformat()
-    })
-    return {'message': 'Trip marked as completed.'}
+    trip_ref = rtdb.reference(f'/trips/{req.trip_id}/status', url=RTDB_URL)
+    ist = pytz.timezone('Asia/Kolkata')
+
+    def complete_trip_txn(current_status):
+        if current_status is None:
+            return current_status
+        if current_status.get('driver_email', '').lower() != driver_email:
+            return None
+        if current_status.get('status') != 'driver_assigned':
+            return None
+            
+        current_status['status'] = 'trip_completed'
+        current_status['completed_at'] = datetime.now(ist).isoformat()
+        return current_status
+
+    try:
+        success = trip_ref.transaction(complete_trip_txn)
+        if success:
+            return {'message': 'Trip marked as completed.'}
+        else:
+            raise HTTPException(status_code=403, detail="Not authorized or trip is not assigned to you.")
+    except rtdb.TransactionAbortedError:
+        raise HTTPException(status_code=409, detail="Conflict: Could not complete trip.")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal error completing trip.")
+
+@router.post("/api/driver/release_trip")
+async def release_trip(req: TripActionRequest, current_user: dict = Depends(require_driver)):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured")
+
+    driver_email = current_user.get('email', '').lower()
+    trip_ref = rtdb.reference(f'/trips/{req.trip_id}/status', url=RTDB_URL)
+
+    def release_trip_txn(current_status):
+        if current_status is None:
+            return current_status
+        if current_status.get('driver_email', '').lower() != driver_email:
+            return None
+        if current_status.get('status') != 'driver_assigned':
+            return None
+            
+        return {'status': 'pending'}
+
+    try:
+        success = trip_ref.transaction(release_trip_txn)
+        if success:
+            return {'message': 'Trip released and set to pending.'}
+        else:
+            raise HTTPException(status_code=403, detail="Not authorized or trip is not assigned to you.")
+    except rtdb.TransactionAbortedError:
+        raise HTTPException(status_code=409, detail="Conflict: Could not release trip.")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal error releasing trip.")
 
 @router.get("/api/geocode")
 async def geocode(q: str):
     if not GOOGLE_MAPS_API_KEY:
         raise HTTPException(status_code=500, detail="Google Maps API Key not configured")
     url = f'https://maps.googleapis.com/maps/api/geocode/json?address={q}&key={GOOGLE_MAPS_API_KEY}'
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(url)
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Geocoding API unavailable.")
+        
     if resp.status_code != 200:
         raise HTTPException(status_code=400, detail="Failed to geocode address")
     data = resp.json()
     if data.get('status') != 'OK':
-        raise HTTPException(status_code=400, detail=f"Geocoding error: {data.get('status')}")
+        raise HTTPException(status_code=400, detail="Geocoding error from provider.")
     return data
 
 @router.get("/api/driver/assigned_trips")
 async def assigned_trips(current_user: dict = Depends(require_driver)):
+    if not RTDB_URL:
+        raise HTTPException(status_code=500, detail="RTDB URL not configured")
+
     driver_email = current_user.get('email', '').lower()
     trips_ref = rtdb.reference('/trips', url=RTDB_URL)
-    trips = trips_ref.get() or {}
+    
+    # Query for trips where status.driver_email == driver_email
+    trips = trips_ref.order_by_child('status/driver_email').equal_to(driver_email).get()
+    
+    if not trips:
+        return {'trips': []}
+
+    results = []
     if isinstance(trips, list):
         trips = {str(i): trip for i, trip in enumerate(trips) if trip}
-        
-    results = []
+
     for trip_id, trip in trips.items():
         if not isinstance(trip, dict):
             continue
@@ -210,8 +268,6 @@ async def assigned_trips(current_user: dict = Depends(require_driver)):
         trip_status = status_info.get('status', 'pending')
         
         if trip_status not in ['driver_assigned', 'trip_completed']:
-            continue
-        if status_info.get('driver_email', '').lower() != driver_email:
             continue
             
         results.append({
@@ -225,30 +281,3 @@ async def assigned_trips(current_user: dict = Depends(require_driver)):
             'status': trip_status
         })
     return {'trips': results}
-
-@router.post("/api/driver/release_trip")
-async def release_trip(request: Request, current_user: dict = Depends(require_driver)):
-    data = await request.json()
-    trip_id = data.get('trip_id')
-    if not trip_id:
-        raise HTTPException(status_code=400, detail="Missing trip_id")
-        
-    driver_email = current_user.get('email', '').lower()
-    
-    trip_ref = rtdb.reference(f'/trips/{trip_id}', url=RTDB_URL)
-    trip_data = trip_ref.get()
-    
-    if not trip_data:
-        raise HTTPException(status_code=404, detail="Trip not found")
-        
-    status_info = trip_data.get('status', {})
-    if status_info.get('driver_email', '').lower() != driver_email:
-        raise HTTPException(status_code=403, detail="Not authorized to release this trip")
-        
-    if status_info.get('status') != 'driver_assigned':
-        raise HTTPException(status_code=400, detail="Trip is not in driver_assigned state")
-        
-    trip_ref.child('status').set({
-        'status': 'pending'
-    })
-    return {'message': 'Trip released and set to pending.'}
