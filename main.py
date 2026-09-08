@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from login import router as login_router
@@ -9,17 +9,12 @@ from d_book import router as driver_router
 from regret_scheduler import scheduler
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
-from fastapi.requests import Request
-from fastapi.exceptions import RequestValidationError
-import requests
-
+import httpx
 import os
-
 
 app = FastAPI()
 
 SESSION_SECRET_KEY = os.getenv('SESSION_SECRET_KEY', 'default-insecure-secret-key')
-
 
 app.add_middleware(
     SessionMiddleware,
@@ -36,9 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.mount("/static", StaticFiles(directory="."), name="static")
-
 
 app.include_router(login_router)
 app.include_router(signup_router)
@@ -51,11 +44,10 @@ RESEND_API_URL = 'https://api.resend.com/emails'
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    print(f"Unhandled error: {exc}")
+    print(f"Unhandled server error: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc)},
-        headers={"Access-Control-Allow-Origin": " https://fillitcloudnexus.web.app"}
+        content={"detail": "An internal server error occurred."}
     )
 
 @app.post('/api/contact')
@@ -79,19 +71,18 @@ async def contact(
             'Authorization': f'Bearer {RESEND_API_KEY}',
             'Content-Type': 'application/json'
         }
-        print("Sending email with data:", data)  
-        response = requests.post(RESEND_API_URL, json=data, headers=headers)
-        print("Resend API response:", response.status_code, response.text)  
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(RESEND_API_URL, json=data, headers=headers)
         
         if response.status_code == 200:
             return {'status': 'success'}
         else:
-            error_detail = response.text
-            print(f"Error sending email: {error_detail}")  
-            return {'status': 'error', 'detail': error_detail}
+            print(f"Error sending email: {response.text}")  
+            return {'status': 'error', 'detail': "Failed to send email"}
     except Exception as e:
         print(f"Exception in contact endpoint: {str(e)}")  
-        return {'status': 'error', 'detail': str(e)}
+        raise HTTPException(status_code=500, detail="Failed to process contact form")
 
 if __name__ == '__main__':
     import uvicorn

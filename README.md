@@ -16,7 +16,7 @@
 - [Getting Started](#getting-started)
 - [User Roles](#user-roles)
 - [API Endpoints](#api-endpoints)
-- [Deployment](#deployment)
+- [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
 
 ## 🎯 Overview
@@ -27,46 +27,24 @@
 
 - *Multi-Role Platform*: Separate interfaces for customers and drivers
 - *Real-time Tracking*: Live trip monitoring and status updates
-- *Multi-language Support*: Available in 10+ Indian languages
-- *Secure Authentication*: Firebase Auth with Google Sign-In integration
+- *Secure Authentication*: Firebase Auth
 - *Responsive Design*: Optimized for all devices and screen sizes
-- *Modern UI/UX*: Clean, intuitive interface with smooth animations
 
 ## ✨ Features
 
-### 🏠 Landing Page
-- *Hero Section*: Compelling value proposition with truck fleet imagery
-- *Service Cards*: Highlighting key offerings and customer reviews
-- *Interactive Reviews*: Carousel modal with customer testimonials
-- *Contact Form*: Lead generation with backend integration
-- *Multi-language Support*: Language selector for diverse user base
-
 ### 👤 Authentication System
-- *Dual Login Methods*: Email/password and Google Sign-In
+- *Dual Login Methods*: Email/password 
 - *Role-based Registration*: Separate signup flows for customers and drivers
 - *Email Verification*: Secure account activation process
-- *Password Security*: Toggle visibility and confirmation validation
-- *Session Management*: JWT token-based authentication
 
 ### 🚚 Customer Dashboard
 - *Trip Booking*: Interactive map-based location selection
-- *Real-time Tracking*: Live trip status and driver location
 - *Trip History*: Comprehensive booking history with details
 - *Profile Management*: Edit personal information and preferences
-- *Multi-language Interface*: Localized experience in preferred language
 
 ### 🚛 Driver Dashboard
 - *Trip Discovery*: Search and filter available trips
-- *Booking Management*: Accept, reject, and manage trip requests
-- *Earnings Tracking*: Financial overview and payment history
-- *Vehicle Management*: Update vehicle details and documents
-- *Performance Analytics*: Trip completion rates and ratings
-
-### 📱 Responsive Design
-- *Mobile-First*: Optimized for smartphones and tablets
-- *Cross-Browser*: Compatible with all modern browsers
-- *Progressive Enhancement*: Graceful degradation for older devices
-- *Touch-Friendly*: Optimized touch targets and gestures
+- *Booking Management*: Accept, complete, and release trips
 
 ## 🛠 Technology Stack
 
@@ -74,177 +52,87 @@
 - *HTML5*: Semantic markup and accessibility
 - *CSS3*: Modern styling with CSS Grid and Flexbox
 - *JavaScript (ES6+)*: Vanilla JS with modern features
-- *Firebase*: Authentication and hosting
-- *Google Maps API*: Location services and mapping
+- *Firebase Hosting*: Frontend hosting
 
 ### Backend
 - *Python FastAPI*: High-performance REST API
-- *PostgreSQL*: Reliable database management
-- *JWT*: Secure token-based authentication
-- *Render*: Cloud deployment platform
-
-### Development Tools
-- *Firebase CLI*: Deployment and configuration
-- *Git*: Version control and collaboration
-- *VS Code*: Development environment
+- *Firebase Authentication*: User identity and token verification
+- *Firestore*: User profiles and metadata
+- *Firebase Realtime Database (RTDB)*: Real-time trip status and location tracking
+- *Google Maps Geocoding API*: Geolocation and routing coordinates
+- *APScheduler*: Background cron jobs for trip lifecycle
+- *Resend*: Transactional email service
 
 ## 🏗 Architecture
 
-Fill-It-Web/  
-├── FILL-IT-WEB-frontend/  
-│   └── FILL-IT-frontend/  
-│       ├── index.html          # Landing page  
-│       ├── login.html          # Authentication  
-│       ├── signup.html         # User registration  
-│       ├── c_home.html         # Customer dashboard  
-│       ├── d_home.html         # Driver dashboard  
-│       ├── c_triphistrory.html # Customer trip history  
-│       ├── d_trip.html         # Driver trip management  
-│       ├── *.css               # Styling files  
-│       ├── *.svg               # Icons and assets  
-│       └── firebase.json       # Firebase configuration  
-└── FILL-IT-Web-backend.zip     # Backend API
+The backend implements a clear separation of concerns using FastAPI:
+- `dependencies.py`: Reusable authentication and authorization dependencies (`get_current_user`, `require_customer`, `require_driver`).
+- `c_book.py`, `c_triphistory.py`: Customer-only endpoints.
+- `d_book.py`: Driver-only endpoints.
+- `regret_scheduler.py`: Scheduled job to move expired pending trips to a `regret` state.
+- `main.py`: Central FastAPI app with global exception handling and CORS.
+
+### Concurrency and Geolocation
+- **Geolocation optimization**: Geocoding is performed exactly once upon trip creation, storing `from_lat` and `from_lon`. Driver search performs local Haversine distance calculations without repeating external API calls.
+- **Race Condition Prevention**: RTDB Transactions are used when drivers accept trips to ensure exactly one driver can claim a given trip at a time.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Node.js (for development)
-- Firebase CLI (for deployment)
+- Python 3.9+
+- Firebase Project Credentials
 
 ### Installation
 
 1. *Clone the repository*  
    ```bash
-   git clone https://github.com/yourusername/Fill-It-Web.git
-   cd Fill-It-Web
+   git clone https://github.com/Mahaprasadnanda/FILL-IT.git
+   cd FILL-IT
    ```
 
-2. *Set up Firebase*  
+2. *Install dependencies*  
    ```bash
-   npm install -g firebase-tools
-   firebase login
-   firebase init hosting
+   pip install -r requirements.txt
    ```
 
-3. *Deploy to Firebase*  
+3. *Run the server*  
    ```bash
-   firebase deploy
+   uvicorn main:app --reload
    ```
-
-### Local Development
-
-1. *Start local server*  
-   ```bash
-   # Using Python
-   python -m http.server 8000
-
-   # Using Node.js
-   npx serve FILL-IT-WEB-frontend/FILL-IT-frontend
-   ```
-
-2. *Access the application*  
-   http://localhost:8000
-
-## 👥 User Roles
-
-### 🛍 Customer
-- *Trip Booking*: Schedule transportation services
-- *Real-time Tracking*: Monitor shipment progress
-- *Payment Management*: Handle billing and payments
-- *Communication*: Direct messaging with drivers
-- *History*: Access complete trip records
-
-### 🚛 Driver
-- *Trip Discovery*: Browse available opportunities
-- *Booking Acceptance*: Manage trip requests
-- *Route Optimization*: Efficient navigation
-- *Earnings Tracking*: Monitor income and payments
-- *Profile Management*: Update vehicle and personal info
 
 ## 🔌 API Endpoints
 
 ### Authentication
-- POST /login - User authentication
-- POST /signup - User registration
-- GET /get-role - Retrieve user role
+- `POST /login` - User authentication
+- `POST /signup` - User registration
+- `POST /refresh-token` - Refresh JWT token
 
-### Trip Management
-- GET /trips - Fetch available trips
-- POST /trips - Create new trip
-- PUT /trips/{id} - Update trip status
-- DELETE /trips/{id} - Cancel trip
+### Customer Endpoints
+- `POST /book-trip` - Create new trip
+- `GET /get-trip-history` - Fetch customer trip history
+- `PUT /edit-trip/{id}` - Update a pending trip
+- `DELETE /delete-trip/{id}` - Cancel a pending trip
 
-### Contact & Support
-- POST /api/contact - Submit contact form
-- GET /support - Get support information
+### Driver Endpoints
+- `POST /api/driver/search_trips` - Find nearby pending trips
+- `POST /api/driver/accept_trip` - Accept a pending trip
+- `POST /api/driver/complete_trip` - Complete an assigned trip
+- `POST /api/driver/release_trip` - Release an assigned trip back to pending
+- `GET /api/driver/assigned_trips` - Get currently assigned trips
 
-## 🌐 Deployment
+## 🌐 Environment Variables
 
-### Firebase Hosting
-The application is deployed on Firebase Hosting for optimal performance and global CDN distribution.
+Configure the following environment variables (e.g., in a `.env` file):
 
-```bash
-# Deploy to production
-firebase deploy --only hosting
-
-# Deploy to staging
-firebase deploy --only hosting:staging
-```
-
-### Environment Variables
 ```env
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_domain
-FIREBASE_PROJECT_ID=your_project_id
-BACKEND_URL=https://fill-it.onrender.com
+FIREBASE_API_KEY=your_firebase_api_key
+RTDB_URL=https://your-project.firebasedatabase.app/
+GOOGLE_MAPS_API_KEY=your_google_maps_key
+RESEND_API_KEY=your_resend_api_key
+SESSION_SECRET_KEY=secure_random_string
 ```
+Also ensure `serviceAccountKey.json` is present at the root for Firebase Admin SDK initialization.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
-
-1. *Fork the repository*
-2. *Create a feature branch*  
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. *Commit your changes*  
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. *Push to the branch*  
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. *Open a Pull Request*
-
-### Development Guidelines
-- Follow HTML5 semantic standards
-- Use CSS Grid and Flexbox for layouts
-- Implement responsive design principles
-- Write clean, documented JavaScript
-- Test across multiple browsers and devices
-
-## 📞 Support
-
-
-- *Email*: cloudnexus@googlegroups.com
-
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- *Firebase Team* for excellent hosting and authentication services
-- *Google Maps API* for location services
-- *Render* for backend hosting
-- *All contributors* who helped build this platform
-
----
-
-*Made with ❤ for the logistics community*
-
-Transform your transportation business with Fill-It-Web - Where efficiency meets innovation!
+We welcome contributions! Please open a pull request.
