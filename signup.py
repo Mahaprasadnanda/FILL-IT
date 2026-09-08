@@ -1,13 +1,13 @@
-
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
 import os
-import requests
+import httpx
 from firebase_config import db
 from datetime import datetime
 from firebase_admin import auth
 from typing import Optional
 from dotenv import load_dotenv
+from dependencies import get_current_user
 
 load_dotenv()
 
@@ -29,10 +29,13 @@ class UpdatePhoneRequest(BaseModel):
     phone: str
 
 @router.post("/signup")
-def signup(user: SignupRequest):
+async def signup(user: SignupRequest):
     email = user.email.lower()  
     if not email:
         raise HTTPException(status_code=400, detail="Email is required and must be a string.")
+    if not FIREBASE_API_KEY:
+        raise HTTPException(status_code=500, detail="Server configuration error.")
+        
     signup_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
     payload = {
         "email": email,
@@ -40,26 +43,26 @@ def signup(user: SignupRequest):
         "returnSecureToken": True
     }
 
-    res = requests.post(signup_url, json=payload)
+    async with httpx.AsyncClient() as client:
+        res = await client.post(signup_url, json=payload)
     if res.status_code != 200:
         raise HTTPException(status_code=res.status_code, detail=res.json())
 
     id_token = res.json()["idToken"]
 
-    
     verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
-    verify_res = requests.post(verify_url, json={"requestType": "VERIFY_EMAIL", "idToken": id_token})
+    async with httpx.AsyncClient() as client:
+        verify_res = await client.post(verify_url, json={"requestType": "VERIFY_EMAIL", "idToken": id_token})
     if verify_res.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to send verification email")
 
-    
     collection = "Customer" if user.role.lower() == "customer" else "Driver"
     data = {
         "name": user.name,
         "email": email,
         "phone": user.phone,
         "role": user.role.lower(),
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow().isoformat()
     }
     if user.role.lower() == "driver":
         if user.vehicle_number is not None:
@@ -86,16 +89,11 @@ async def verify_phone_token(request: Request):
         raise HTTPException(status_code=401, detail=str(e))
 
 @router.post("/update-phone")
-def update_phone(user: UpdatePhoneRequest, authorization: str = None):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid or missing authorization header")
+async def update_phone(user: UpdatePhoneRequest, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email", "").lower() != user.email.lower():
+        raise HTTPException(status_code=403, detail="Unauthorized email")
     
-    id_token = authorization.split("Bearer ")[1]
     try:
-        decoded_token = auth.verify_id_token(id_token)
-        if decoded_token.get("email").lower() != user.email.lower():
-            raise HTTPException(status_code=403, detail="Unauthorized email")
-        
         db.collection("Customer").document(user.email.lower()).update({
             "phone": user.phone
         })

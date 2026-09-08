@@ -2,7 +2,7 @@ fastapi
 uvicorn
 firebase-admin
 python-dotenv
-requests
+httpx
 pydantic
 itsdangerous
 email-validator
